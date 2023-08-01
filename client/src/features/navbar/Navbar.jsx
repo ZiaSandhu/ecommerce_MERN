@@ -1,16 +1,16 @@
-import { Fragment } from 'react'
+import { Fragment, useEffect } from 'react'
 import { Disclosure, Menu, Transition } from '@headlessui/react'
 import { Bars3Icon, BellIcon, ShoppingCartIcon, XMarkIcon } from '@heroicons/react/24/outline'
-import {NavLink} from 'react-router-dom'
+import {NavLink, useLocation} from 'react-router-dom'
 const user = {
   name: 'Tom Cook',
   email: 'tom@example.com',
   imageUrl:
     'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
 }
-const navigation = [
+let navigation = [
   { name: 'Ecommerce', href: '/', current: true },
-  { name: 'Products', href: '#', current: false },
+  { name: 'Products', href: '/products', current: false },
 ]
 const userNavigation = [
   { name: 'Your Profile', href: '#' },
@@ -22,7 +22,11 @@ function classNames(...classes) {
   return classes.filter(Boolean).join(' ')
 }
 
-export default function Navbar({children}) {
+export default function Navbar() {
+// let location = useLocation()
+// useEffect(()=>{
+//   navigation = navigation.map((nav)=> nav.href === location.pathname ? {...nav, current:true} : {...nav, current:false})
+// },[location.pathname])
   return (
     <div className="min-h-full">
       <Disclosure as="nav" className="bg-gray-800">
@@ -48,7 +52,7 @@ export default function Navbar({children}) {
                             item.current
                               ? "bg-gray-900 text-white"
                               : "text-gray-300 hover:bg-gray-700 hover:text-white",
-                            "rounded-md px-3 py-2 text-sm font-medium"
+                            "rounded-md px-3 py-2 text-sm font-medium active:bg-gray-900 text-white"
                           )}
                           aria-current={item.current ? "page" : undefined}
                         >
@@ -60,13 +64,17 @@ export default function Navbar({children}) {
                 </div>
                 <div className="hidden md:block">
                   <div className="ml-4 flex items-center md:ml-6">
-                    <button
-                      type="button"
+                    <NavLink
+                      to="/cart"
+                      // type="button"
                       className="relative rounded-full bg-gray-800 p-1 text-gray-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800"
                     >
                       <span className="absolute -inset-1.5" />
-                      <ShoppingCartIcon className="h-6 w-6" aria-hidden="true" />
-                    </button>
+                      <ShoppingCartIcon
+                        className="h-6 w-6"
+                        aria-hidden="true"
+                      />
+                    </NavLink>
                     <span className="inline-flex items-center rounded-md mb-7 -ml-3 z-10 bg-red-50 px-2 py-1 text-xs font-medium text-red-700 ring-1 ring-inset ring-red-600/10">
                       3
                     </span>
@@ -97,15 +105,15 @@ export default function Navbar({children}) {
                           {userNavigation.map((item) => (
                             <Menu.Item key={item.name}>
                               {({ active }) => (
-                                <a
-                                  href={item.href}
+                                <NavLink
+                                  to={item.href}
                                   className={classNames(
                                     active ? "bg-gray-100" : "",
                                     "block px-4 py-2 text-sm text-gray-700"
                                   )}
                                 >
                                   {item.name}
-                                </a>
+                                </NavLink>
                               )}
                             </Menu.Item>
                           ))}
@@ -134,8 +142,8 @@ export default function Navbar({children}) {
                 {navigation.map((item) => (
                   <Disclosure.Button
                     key={item.name}
-                    as="a"
-                    href={item.href}
+                    as={NavLink}
+                    to={item.href}
                     className={classNames(
                       item.current
                         ? "bg-gray-900 text-white"
@@ -165,13 +173,14 @@ export default function Navbar({children}) {
                       {user.email}
                     </div>
                   </div>
-                  <button
-                    type="button"
+                  <NavLink
+                    to="/cart"
+                    // type="button"
                     className="relative ml-auto flex-shrink-0 rounded-full bg-gray-800 p-1 text-gray-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800"
                   >
                     <span className="absolute -inset-1.5" />
                     <ShoppingCartIcon className="h-6 w-6" aria-hidden="true" />
-                  </button>
+                  </NavLink>
                   <span className="inline-flex items-center rounded-md mb-7 -ml-3 z-10 bg-red-50 px-2 py-1 text-xs font-medium text-red-700 ring-1 ring-inset ring-red-600/10">
                     3
                   </span>
@@ -193,15 +202,6 @@ export default function Navbar({children}) {
           </>
         )}
       </Disclosure>
-
-      {/* <header className="bg-white shadow">
-          <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-            <h1 className="text-3xl font-bold tracking-tight text-gray-900">Dashboard</h1>
-          </div>
-        </header>
-        <main>
-          <div className="mx-auto max-w-7xl py-6 sm:px-6 lg:px-8">{children}</div>
-        </main> */}
     </div>
   );
 }

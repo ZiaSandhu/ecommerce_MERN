@@ -5,7 +5,7 @@ import { Dialog, Disclosure, Menu, Transition } from '@headlessui/react'
 import { XMarkIcon } from '@heroicons/react/24/outline'
 import { ChevronDownIcon, FunnelIcon, MinusIcon, PlusIcon, Squares2X2Icon } from '@heroicons/react/20/solid'
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/20/solid'
-
+import {NavLink} from 'react-router-dom'
 const items = [
   { id: 1, title: 'Back End Developer', department: 'Engineering', type: 'Full-time', location: 'Remote' },
   { id: 2, title: 'Front End Developer', department: 'Engineering', type: 'Full-time', location: 'Remote' },
@@ -60,7 +60,7 @@ const products = [
   {
     id: 1,
     name: 'Basic Tee',
-    href: '#',
+    href: 'productdetail',
     imageSrc: 'https://tailwindui.com/img/ecommerce-images/product-page-01-related-product-01.jpg',
     imageAlt: "Front of men's Basic Tee in black.",
     price: '$35',
@@ -386,13 +386,13 @@ export default function Counter() {
                               <div className="mt-4 flex justify-between">
                                 <div>
                                   <h3 className="text-sm text-gray-700">
-                                    <a href={product.href}>
+                                    <NavLink to={product.href}>
                                       <span
                                         aria-hidden="true"
                                         className="absolute inset-0"
                                       />
                                       {product.name}
-                                    </a>
+                                    </NavLink>
                                   </h3>
                                   <p className="mt-1 text-sm text-gray-500">
                                     {product.color}
