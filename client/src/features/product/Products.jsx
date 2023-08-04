@@ -6,9 +6,9 @@ import { StarIcon, XMarkIcon } from '@heroicons/react/24/outline'
 import { ChevronDownIcon, FunnelIcon, MinusIcon, PlusIcon, Squares2X2Icon } from '@heroicons/react/20/solid'
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/20/solid'
 import {NavLink} from 'react-router-dom'
-// import ProductList from './ProductList'
-import {setAllProducts} from '../../store/productSlice'
-import { getAllProducts, getFilterProducts } from '../../api/internal/productApi';
+
+import {setAllProducts, setBrand, setCategory} from '../../store/productSlice'
+import { getProducts,getCategories,getBrands } from "../../api/internal/productApi";
 
 const sortOptions = [
   { name: 'Best Rating', sort: 'rating', order: 'desc' },
@@ -16,61 +16,7 @@ const sortOptions = [
   { name: 'Price: High to Low', sort: 'price', order: 'desc' },
 ]
 
-const filters = [
-  //   {
-  //     id: "color",
-  //     name: "Color",
-  //     options: [
-  //       { value: "white", label: "White", checked: false },
-  //       { value: "beige", label: "Beige", checked: false },
-  //       { value: "blue", label: "Blue", checked: true },
-  //       { value: "brown", label: "Brown", checked: false },
-  //       { value: "green", label: "Green", checked: false },
-  //       { value: "purple", label: "Purple", checked: false },
-  //     ],
-  //   },
-  {
-    id: "category",
-    name: "Category",
-    options: [
-      { value: "smartphones", label: "SMARTPHONES" },
-      { value: "laptops", label: "LAPTOPS" },
-      { value: "fragrances", label: "FRAGRANCES" },
-      { value: "skincare", label: "SKINCARE" },
-      { value: "groceries", label: "GROCERIES" },
-      { value: "home-decoration", label: "HOME DECORATION" },
-      { value: "furniture", label: "FURNITURE" },
-      { value: "tops", label: "TOPS" },
-      { value: "womens-dresses", label: "WOMENS DRESSES" },
-      { value: "womens-shoes", label: "WOMENS SHOES" },
-    ],
-  },
-  {
-    id: "brand",
-    name: "Brands",
-    options: [
-      { value: "Apple", label: "APPLE" },
-      { value: "Samsung", label: "SAMSUNG" },
-      { value: "OPPO", label: "OPPO" },
-      { value: "Huawei", label: "HUAWEI" },
-      {
-        value: "Microsoft Surface",
-        label: "MICROSOFT SURFACE",
-      },
-      { value: "Infinix", label: "INFINIX" },
-      { value: "HP Pavilion", label: "HP PAVILION" },
-      {
-        value: "Impression of Acqua Di Gio",
-        label: "IMPRESSION OF ACQUA DI GIO",
-      },
-      { value: "Royal_Mirage", label: "ROYAL_MIRAGE" },
-      {
-        value: "Fog Scent Xpressio",
-        label: "FOG SCENT XPRESSIO",
-      },
-    ],
-  },
-];
+
 
 function classNames(...classes) {
   return classes.filter(Boolean).join(' ')
@@ -80,57 +26,93 @@ export default function Products() {
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const [filter, setFilter] = useState({});
   const [sort, setSort] = useState({});
+  const [paginate,setPaginate] = useState({
+    _page:1,
+    _limit:10,
+  })
+
 
   const handleFilter = async(e,section) => {
     let newFilter = {...filter}
-  if (e.target.checked) {
-    if (!newFilter.hasOwnProperty(section.id)) {
-      newFilter[section.id] = [e.target.value];
-    } else {
-      newFilter[section.id].push(e.target.value);
+    if (e.target.checked) {
+      if (!newFilter.hasOwnProperty(section.id)) {
+        newFilter[section.id] = [e.target.value];
+      } else {
+        newFilter[section.id].push(e.target.value);
+      }
     }
-  }
-  else{
-    if (newFilter.hasOwnProperty(section.id)) {
-      const index = newFilter[section.id].indexOf(e.target.value);
-      if (index !== -1) {
-        newFilter[section.id].splice(index, 1);
-        if (newFilter[section.id].length === 0) {
-          delete newFilter[section.id];
+    else{
+      if (newFilter.hasOwnProperty(section.id)) {
+        const index = newFilter[section.id].indexOf(e.target.value);
+        if (index !== -1) {
+          newFilter[section.id].splice(index, 1);
+          if (newFilter[section.id].length === 0) {
+            delete newFilter[section.id];
+          }
         }
       }
     }
-  }
+    setPaginate(prev => ({...prev, _page:1}) )
     setFilter(newFilter)
-    let response = await getFilterProducts(newFilter,sort)
-    dispatch(setAllProducts(response.data));
-    
   };
   const handleSort = async(e,option) => {
     let sort = {
       _sort : option.sort,
       _order : option.order
     }
-    setSort(sort)
-    let response = await getFilterProducts(filter,sort)
-    dispatch(setAllProducts(response.data));
-    
+    setPaginate(prev => ({...prev, _page:1}) )
+    setSort(sort)    
+  };
+  const handlePagination = async(page) => {
+    let max = totalProducts/paginate._limit
+    if(page>=1 && page<=max){
+      setPaginate(prev => ({...prev, _page:page}) )
+    }
   };
   useEffect(() => {
     (async function products() {
-      let products = await getAllProducts();
-      dispatch(setAllProducts(products.data));
+      let response = await getProducts(filter,sort,paginate);
+      let payload = {
+        products: response.data,
+        totalProducts: response.headers['x-total-count']
+      }
+      dispatch(setAllProducts(payload));
     })();
-  }, []);
+  }, [dispatch,filter,sort,paginate]);
 
+  useEffect(
+    ()=>{
+      (async function () {
+        let response = await getCategories();
+        dispatch(setCategory(response.data))
+        response = await getBrands();
+        dispatch(setBrand(response.data))
+      })();
+    },
+    []
+  )
   const products = useSelector((state) => state.product.products);
-
+  const totalProducts = useSelector((state) => state.product.totalProducts);
+  const categories = useSelector((state) => state.product.categories);
+  const brands = useSelector((state) => state.product.brands);
+  const filters = [
+    {
+      id: "category",
+      name: "Category",
+      options: categories
+    },
+    {
+      id: "brand",
+      name: "Brands",
+      options: brands
+    },
+  ];
   return (
     <div>
       <div className="bg-white">
         <div>
           {/* Mobile filter dialog */}
-          <MobileFilter handleFilter={handleFilter} mobileFiltersOpen={mobileFiltersOpen} setMobileFiltersOpen={setMobileFiltersOpen} />
+          <MobileFilter filters={filters} handleFilter={handleFilter} mobileFiltersOpen={mobileFiltersOpen} setMobileFiltersOpen={setMobileFiltersOpen} />
 
           <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="flex items-baseline justify-between border-b border-gray-200 pb-6 pt-24">
@@ -153,7 +135,7 @@ export default function Products() {
 
               <div className="grid grid-cols-1 gap-x-8 gap-y-10 lg:grid-cols-4">
                 {/* Filters */}
-                <DesktopFilter handleFilter={handleFilter} />
+                <DesktopFilter filters={filters} handleFilter={handleFilter} />
 
                 {/* Product grid */}
                 <ProductGrid products={products}/>
@@ -162,7 +144,7 @@ export default function Products() {
             </section>
 
             {/* Product Pagination */}
-            <Pagination />
+            <Pagination handlePagination={handlePagination} paginate={paginate} totalProducts={totalProducts} />
           </main>
         </div>
       </div>
@@ -191,7 +173,7 @@ function ProductGrid({products}) {
                 <div className="mt-4 flex justify-between">
                   <div>
                     <h3 className="text-sm text-gray-700">
-                      <NavLink to={product.href}>
+                      <NavLink to={`/product/${product.id}`} >
                         <span aria-hidden="true" className="absolute inset-0" />
                         {product.title}
                       </NavLink>
@@ -212,7 +194,7 @@ function ProductGrid({products}) {
     </div>
   );
 }
-function MobileFilter({handleFilter, mobileFiltersOpen, setMobileFiltersOpen}) {
+function MobileFilter({filters,handleFilter, mobileFiltersOpen, setMobileFiltersOpen}) {
   return (
     <Transition.Root show={mobileFiltersOpen} as={Fragment}>
       <Dialog
@@ -289,7 +271,7 @@ function MobileFilter({handleFilter, mobileFiltersOpen, setMobileFiltersOpen}) {
                           <div className="space-y-6">
                             {section.options.map((option, optionIdx) => (
                               <div
-                                key={option.e.target.value}
+                                key={optionIdx}
                                 className="flex items-center"
                               >
                                 <input
@@ -322,7 +304,7 @@ function MobileFilter({handleFilter, mobileFiltersOpen, setMobileFiltersOpen}) {
     </Transition.Root>
   );
 }
-function DesktopFilter({handleFilter}) {
+function DesktopFilter({filters,handleFilter}) {
   return (
     <form className="hidden lg:block">
       {filters.map((section) => (
@@ -376,29 +358,37 @@ function DesktopFilter({handleFilter}) {
     </form>
   );
 }
-function Pagination(filters) {
+function Pagination({handlePagination, paginate, totalProducts}) {
   return (
     <div className="flex items-center justify-between border-t border-gray-200 bg-white px-4 py-3 sm:px-6">
       <div className="flex flex-1 justify-between sm:hidden">
-        <a
-          href="#"
+        <div
+          onClick={(e) => handlePagination(paginate._page - 1)}
           className="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
         >
           Previous
-        </a>
-        <a
-          href="#"
+        </div>
+        <div
+          onClick={(e) => handlePagination(paginate._page + 1)}
           className="relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
         >
           Next
-        </a>
+        </div>
       </div>
       <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
         <div>
           <p className="text-sm text-gray-700">
-            Showing <span className="font-medium">1</span> to{" "}
-            <span className="font-medium">10</span> of{" "}
-            <span className="font-medium">97</span> results
+            Showing{" "}
+            <span className="font-medium">
+              {(paginate._page - 1) * paginate._limit + 1}
+            </span>{" "}
+            to{" "}
+            <span className="font-medium">
+              {paginate._page * paginate._limit > totalProducts
+                ? totalProducts
+                : paginate._page * paginate._limit}
+            </span>{" "}
+            of <span className="font-medium"> {totalProducts} </span> results
           </p>
         </div>
         <div>
@@ -406,41 +396,35 @@ function Pagination(filters) {
             className="isolate inline-flex -space-x-px rounded-md shadow-sm"
             aria-label="Pagination"
           >
-            <a
-              href="#"
+            <div
+              onClick={(e) => handlePagination(paginate._page - 1)}
               className="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0"
             >
               <span className="sr-only">Previous</span>
               <ChevronLeftIcon className="h-5 w-5" aria-hidden="true" />
-            </a>
-
-            <a
-              href="#"
-              aria-current="page"
-              className="relative z-10 inline-flex items-center bg-indigo-600 px-4 py-2 text-sm font-semibold text-white focus:z-20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-            >
-              1
-            </a>
-            <a
-              href="#"
-              className="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0"
-            >
-              2
-            </a>
-            <a
-              href="#"
-              className="relative hidden items-center px-4 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0 md:inline-flex"
-            >
-              3
-            </a>
-
-            <a
-              href="#"
+            </div>
+            {Array.from({
+              length: Math.ceil(totalProducts / paginate._limit),
+            }).map((item, index) => (
+              <div
+                key={index}
+                onClick={(e) => handlePagination(index + 1)}
+                className={`relative hidden items-center px-4 py-2 text-sm font-semibold ${
+                  index + 1 === paginate._page
+                    ? "bg-indigo-600 text-white"
+                    : "text-gray-900"
+                } ring-1 ring-inset ring-gray-300 hover:bg-gray-300 hover:text-black  md:inline-flex cursor-pointer`}
+              >
+                {index + 1}
+              </div>
+            ))}
+            <div
+              onClick={(e) => handlePagination(paginate._page + 1)}
               className="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0"
             >
               <span className="sr-only">Next</span>
               <ChevronRightIcon className="h-5 w-5" aria-hidden="true" />
-            </a>
+            </div>
           </nav>
         </div>
       </div>
