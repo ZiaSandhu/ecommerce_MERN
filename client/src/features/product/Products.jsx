@@ -64,30 +64,32 @@ export default function Products() {
     setSort(sort)    
   };
   const handlePagination = async(page) => {
-    let max = totalProducts/paginate._limit
+    let max = Math.ceil(totalProducts/paginate._limit)
     if(page>=1 && page<=max){
       setPaginate(prev => ({...prev, _page:page}) )
     }
   };
   useEffect(() => {
-    (async function products() {
+    async function fetchproducts() {
       let response = await getProducts(filter,sort,paginate);
       let payload = {
         products: response.data,
         totalProducts: response.headers['x-total-count']
       }
       dispatch(setAllProducts(payload));
-    })();
+    }
+    fetchproducts();
   }, [dispatch,filter,sort,paginate]);
 
   useEffect(
     ()=>{
-      (async function () {
+      async function getFeatures () {
         let response = await getCategories();
         dispatch(setCategory(response.data))
         response = await getBrands();
         dispatch(setBrand(response.data))
-      })();
+      };
+      getFeatures();
     },
     []
   )

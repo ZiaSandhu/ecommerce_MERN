@@ -2,6 +2,8 @@ import { Fragment, useEffect } from 'react'
 import { Disclosure, Menu, Transition } from '@headlessui/react'
 import { Bars3Icon, BellIcon, ShoppingCartIcon, XMarkIcon } from '@heroicons/react/24/outline'
 import {NavLink, useLocation} from 'react-router-dom'
+
+import {logoutUser} from '../../store/userSlice'
 const user = {
   name: 'Tom Cook',
   email: 'tom@example.com',
@@ -15,7 +17,7 @@ let navigation = [
 const userNavigation = [
   { name: 'Your Profile', href: '#' },
   { name: 'Settings', href: '#' },
-  { name: 'Sign out', href: '#' },
+  { name: 'Sign out', href: '/signout' },
 ]
 
 function classNames(...classes) {
@@ -189,11 +191,14 @@ export default function Navbar() {
                   {userNavigation.map((item) => (
                     <Disclosure.Button
                       key={item.name}
-                      as="a"
-                      href={item.href}
-                      className="block rounded-md px-3 py-2 text-base font-medium text-gray-400 hover:bg-gray-700 hover:text-white"
                     >
-                      {item.name}
+                      <NavLink
+                      to={item.href}
+                      className="block rounded-md px-3 py-2 text-base font-medium text-gray-400 hover:bg-gray-700 hover:text-white"
+                      >
+                        {item.name}
+
+                      </NavLink>
                     </Disclosure.Button>
                   ))}
                 </div>

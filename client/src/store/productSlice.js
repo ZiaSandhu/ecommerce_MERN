@@ -24,7 +24,6 @@ const productSlice = createSlice({
         },
         setProduct:(state,action)=>{
             state.productDetail = action.payload
-            console.log("🚀 ~ file: productSlice.js:27 ~ state.productDetail:", state.productDetail)
             
         }
     }

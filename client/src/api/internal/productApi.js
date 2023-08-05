@@ -45,7 +45,6 @@ export const getProductById = async(id) => {
     let response; 
     try {
         response  = await api.get('/products/'+id)
-        console.log("🚀 ~ file: productApi.js:48 ~ getProductById ~ response:", response)
     } catch (error) {
         console.log(error)
     }

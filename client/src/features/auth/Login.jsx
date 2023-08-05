@@ -1,5 +1,42 @@
-import {NavLink} from 'react-router-dom'
+import {NavLink, useNavigate} from 'react-router-dom'
+import {useDispatch} from 'react-redux'
+import { useForm } from "react-hook-form"
+
+import {loginUserApi} from '../../api/internal/userApi'
+import {loginUser} from '../../store/userSlice'
+import { useState } from 'react'
+
 export default function Login() {
+  const navigate = useNavigate()
+  const dispatch = useDispatch()
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm()
+  const [error,setError] = useState('')
+  async function onSubmit(data){
+    let user = {
+      email: data.email,
+      password: data.password
+    }
+    let res = await loginUserApi(user)
+    if(res.status === 200){
+      dispatch(loginUser(user))
+      const originalRoute = localStorage.getItem('originalRoute');    
+      if (originalRoute) {
+        localStorage.removeItem('originalRoute'); // Remove the stored route
+        navigate(originalRoute)
+      } else {
+        navigate('/')
+        
+      }
+    }
+    else{
+      // console.log(res.status, res.message); // when create api
+      setError(' Invalid Credentials')
+    }
+  }
   return (
     <>
       
@@ -16,20 +53,23 @@ export default function Login() {
         </div>
 
         <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
-          <form className="space-y-6" action="#" method="POST">
+          <p className='text-center text-red-600'>{error}</p>
+          <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
             <div>
               <label htmlFor="email" className="block text-sm font-medium leading-6 text-gray-900">
                 Email address
               </label>
               <div className="mt-2">
-                <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  autoComplete="email"
-                  required
-                  className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                />
+              <input
+                    id="email"
+                    {...register('email', {required: 'Enter email address', pattern:{
+                      value:/^([A-Z|a-z|0-9](\.|_){0,1})+[A-Z|a-z|0-9]\@([A-Z|a-z|0-9])+((\.){0,1}[A-Z|a-z|0-9]){2}\.[a-z]{2,3}$/gm,
+                      message:'Enter valid email!'
+                    }})}
+                    type="text"
+                    className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                  />
+                  {errors.email && <p className='text-red-900 font-light'>{errors.email.message}</p>}
               </div>
             </div>
 
@@ -45,14 +85,17 @@ export default function Login() {
                 </div>
               </div>
               <div className="mt-2">
-                <input
-                  id="password"
-                  name="password"
-                  type="password"
-                  autoComplete="current-password"
-                  required
-                  className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                />
+              <input
+                    id="password"
+                    {...register('password', {required:'Password is missing' , pattern:{
+                      value:/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,}$/gm,
+                      message:`- at least 8 characters \n- must contain at least \n  - uppercase letter \n  - lowercase letter \n  - number \n- Can contain special characters`
+                    }})}
+                    type="text"
+                    className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                  />
+                  {errors.password && <pre className='text-red-900 font-light'>{errors.password.message}</pre>}
+
               </div>
             </div>
 
