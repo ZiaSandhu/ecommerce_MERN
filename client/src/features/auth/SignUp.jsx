@@ -20,22 +20,21 @@ export default function Signup() {
     let user = {
       email: data.email,
       username: data.username,
-      password: data.password // for now
+      password: data.password, // for now
     }
     let res = await registerUser(user)
-    console.log("🚀 ~ file: SignUp.jsx:23 ~ onSubmit ~ res:", res)
+    
     if(res.status === 201){
-      dispatch(loginUser(user))
+      dispatch(loginUser(res.data))
       const originalRoute = localStorage.getItem('originalRoute');    
       if (originalRoute) {
         localStorage.removeItem('originalRoute'); // Remove the stored route
         navigate(originalRoute)
       } else {
         navigate('/')
-        
       }
-    }else{
-      setError('Something went wrong')
+    }else if (res.code === "ERR_BAD_REQUEST"){
+      setError(res.response.data.message)
     }
   }
     return (
@@ -68,7 +67,7 @@ export default function Signup() {
                       message:'Username is less than 5 characters'
                     }})}
                     type="text"
-                    className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                    className="block px-2 w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                   />
                   {errors.username && <p className='text-red-900 font-light'>{errors.username.message}</p>}
                 </div>
@@ -86,7 +85,7 @@ export default function Signup() {
                       message:'Enter valid email!'
                     }})}
                     type="text"
-                    className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                    className="block px-2 w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                   />
                   {errors.email && <p className='text-red-900 font-light'>{errors.email.message}</p>}
 
@@ -106,8 +105,8 @@ export default function Signup() {
                       value:/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,}$/gm,
                       message:`- at least 8 characters \n- must contain at least \n  - uppercase letter \n  - lowercase letter \n  - number \n- Can contain special characters`
                     }})}
-                    type="password"
-                    className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                    type="text"
+                    className="block px-2 w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                   />
                   {errors.password && <pre className='text-red-900 font-light'>{errors.password.message}</pre>}
 
@@ -124,8 +123,8 @@ export default function Signup() {
                   <input
                     id="confirmPassword"
                     {...register('confirmPassword', {validate: (value,formValues) => value === formValues.password || 'Password does not match' })}
-                    type="password"
-                    className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                    type="text"
+                    className="block px-2 w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                   />
                   {errors.confirmPassword && <p className='text-red-900 font-light'>{errors.confirmPassword.message}</p>}
 

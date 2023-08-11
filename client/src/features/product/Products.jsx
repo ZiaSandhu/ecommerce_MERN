@@ -7,13 +7,15 @@ import { ChevronDownIcon, FunnelIcon, MinusIcon, PlusIcon, Squares2X2Icon } from
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/20/solid'
 import {NavLink} from 'react-router-dom'
 
-import {setAllProducts, setBrand, setCategory} from '../../store/productSlice'
-import { getProducts,getCategories,getBrands } from "../../api/internal/productApi";
+import {setProducts, setBrand, setCategory, setAllProducts} from '../../store/productSlice'
+import { getProducts,getAllProduct } from "../../api/internal/productApi";
 
 const sortOptions = [
-  { name: 'Best Rating', sort: 'rating', order: 'desc' },
-  { name: 'Price: Low to High', sort: 'price', order: 'asc' },
-  { name: 'Price: High to Low', sort: 'price', order: 'desc' },
+  { name: 'Best Rating', sort: 'rating', order: '-1' },
+  { name: 'Price: Low to High', sort: 'price', order: '1' },
+  { name: 'Price: High to Low', sort: 'price', order: '-1' },
+  { name: 'Title: A-Z', sort: 'title', order: '1' },
+  { name: 'Title: Z-A', sort: 'title', order: '-1' },
 ]
 
 
@@ -32,7 +34,7 @@ export default function Products() {
   })
 
 
-  const handleFilter = async(e,section) => {
+  const handleFilter = (e,section) => {
     let newFilter = {...filter}
     if (e.target.checked) {
       if (!newFilter.hasOwnProperty(section.id)) {
@@ -51,6 +53,10 @@ export default function Products() {
           }
         }
       }
+    }
+    if(section.id === 'category'){
+      console.log(newFilter)
+      dispatch(setBrand(newFilter.category))
     }
     setPaginate(prev => ({...prev, _page:1}) )
     setFilter(newFilter)
@@ -71,12 +77,15 @@ export default function Products() {
   };
   useEffect(() => {
     async function fetchproducts() {
-      let response = await getProducts(filter,sort,paginate);
-      let payload = {
-        products: response.data,
-        totalProducts: response.headers['x-total-count']
+      let response = await getProducts(filter,sort,paginate);      
+      if (response.status === 200){
+        let payload = {
+          products: response.data.products,
+          totalProducts: response.data.totalItem
+        }
+        dispatch(setProducts(payload));
       }
-      dispatch(setAllProducts(payload));
+       
     }
     fetchproducts();
   }, [dispatch,filter,sort,paginate]);
@@ -84,10 +93,10 @@ export default function Products() {
   useEffect(
     ()=>{
       async function getFeatures () {
-        let response = await getCategories();
-        dispatch(setCategory(response.data))
-        response = await getBrands();
-        dispatch(setBrand(response.data))
+        let response = await getAllProduct();
+        dispatch(setAllProducts(response.data.products))
+        dispatch(setCategory())
+        dispatch(setBrand())
       };
       getFeatures();
     },
@@ -137,10 +146,10 @@ export default function Products() {
 
               <div className="grid grid-cols-1 gap-x-8 gap-y-10 lg:grid-cols-4">
                 {/* Filters */}
-                <DesktopFilter filters={filters} handleFilter={handleFilter} />
+                <DesktopFilter filters={filters} filter={filter} handleFilter={handleFilter} />
 
                 {/* Product grid */}
-                <ProductGrid products={products}/>
+                {products.length > 0 ? <ProductGrid products={products}/> : <p>No Product to Display</p>}
                 {/* //product grid end */}
               </div>
             </section>
@@ -162,7 +171,7 @@ function ProductGrid({products}) {
           <div className="mt-6 grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 xl:gap-x-8">
             {products.map((product) => (
               <div
-                key={product.id}
+                key={product._id}
                 className="group relative border-solid border-2 border-black-300 p-2"
               >
                 <div className="aspect-h-1 aspect-w-1 w-full overflow-hidden rounded-md bg-gray-200 lg:aspect-none group-hover:opacity-75 lg:h-60">
@@ -175,7 +184,7 @@ function ProductGrid({products}) {
                 <div className="mt-4 flex justify-between">
                   <div>
                     <h3 className="text-sm text-gray-700">
-                      <NavLink to={`/product/${product.id}`} >
+                      <NavLink to={`/product/${product._id}`} >
                         <span aria-hidden="true" className="absolute inset-0" />
                         {product.title}
                       </NavLink>
@@ -306,7 +315,7 @@ function MobileFilter({filters,handleFilter, mobileFiltersOpen, setMobileFilters
     </Transition.Root>
   );
 }
-function DesktopFilter({filters,handleFilter}) {
+function DesktopFilter({filters,filter,handleFilter}) {
   return (
     <form className="hidden lg:block">
       {filters.map((section) => (
@@ -317,6 +326,7 @@ function DesktopFilter({filters,handleFilter}) {
         >
           {({ open }) => (
             <>
+            {/* {console.log("filter rendered")}   */}
               <h3 className="-my-3 flow-root">
                 <Disclosure.Button className="flex w-full items-center justify-between bg-white py-3 text-sm text-gray-400 hover:text-gray-500">
                   <span className="font-medium text-gray-900">
@@ -341,6 +351,7 @@ function DesktopFilter({filters,handleFilter}) {
                         defaultValue={option.value}
                         type="checkbox"
                         onChange={(e) => handleFilter(e, section)}
+                        checked={(filter[section.id] || []).includes(option.value)}
                         className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
                       />
                       <label
@@ -468,7 +479,7 @@ function Sorting({sortOptions,handleSort,setMobileFiltersOpen}) {
                                     ? "font-medium text-gray-900"
                                     : "text-gray-500",
                                   active ? "bg-gray-100" : "",
-                                  "block px-4 py-2 text-sm"
+                                  "block px-4 py-2 text-sm cursor-pointer"
                                 )}
                               >
                                 {option.name}

@@ -45,32 +45,49 @@ const getOrderById = async(req,res,next) => {
 }
 
 const createOrder = async(req,res,next) => {
+    const addressSchema = Joi.object({
+        name: Joi.string().required(),
+        email: Joi.string().required(),
+        phone: Joi.string().required(),
+        country: Joi.string().required(),
+        street: Joi.string().required(),
+        city: Joi.string().required(),
+        region: Joi.string().required(),
+        postalcode: Joi.string().required(),
+        _id: Joi.string().regex(IdPattern).required(),
+    })
     const orderSchema = Joi.object({
         userId: Joi.string().regex(IdPattern).required(),
         products: Joi.array().items(
             Joi.object({
                 productId: Joi.string().regex(IdPattern).required(),
                 qty: Joi.number(),
-                price: Joi.number(),
-                subTotal: Joi.number(),
-                variation: Joi.string()
+                price: Joi.number().required(),
+                subTotal: Joi.number().required(),
+                title: Joi.string().required(),
+                color: Joi.string().required(),
+                size: Joi.string().required(),
+                thumbnail: Joi.string().required(),
+                itemId: Joi.string()
             })
         ),
         status : Joi.string().required(),
-        amount : Joi.number().required(),
+        subTotal : Joi.number().required(),
+        totalAmount : Joi.number().required(),
+        shippingFee : Joi.number().required(),
         payment : Joi.string().required(),
-        shipping : Joi.number().required(),
+        shippingAddress : addressSchema.required(),
     })
     const {error} = orderSchema.validate(req.body)
     if(error){
         return next(error)
     }
 
-    const {userId, products, status, amount, payment, shipping } = req.body
+    const {userId, products, status, totalAmount, payment, shippingFee, subTotal, shippingAddress } = req.body
 
     let order;
     const newOrder = new Order({
-        userId, products, status, amount, payment, shipping
+        userId, products, status, totalAmount, payment, shippingFee, subTotal, shippingAddress 
     })
     try {
         order = await newOrder.save();

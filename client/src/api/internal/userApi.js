@@ -1,28 +1,49 @@
-import {api} from './index'
+import { api } from './index'
 
-export const registerUser = async(data) => {
-    
+export const registerUser = async (data) => {
+
     let response;
     try {
         response = await api.post(
-            '/users',
+            '/register',
             data
         )
     } catch (error) {
-        console.log(error)
+        // console.log(error)
+        return error
     }
     return response
 }
-export const loginUserApi = async(data) => {
-    
+export const loginUserApi = async (data) => {
+
     let response;
     try {
-        response = await api.get(
-            `/users?email${data.email}&password=${data.password}`,
+        response = await api.post(
+            '/login', data
         )
-        if(!response.data.length){
-            return response.status = 401
-        }
+    } catch (error) {
+        return error
+    }
+    return response
+}
+export const updateUser = async (data) => {
+    let response;
+    try {
+        response = await api.patch(
+            '/updateuser',
+            data
+        )
+    } catch (error) {
+        console.log("🚀 ~ file: userApi.js:37 ~ updateUser ~ error:", error)
+        return error
+    }
+    return response
+}
+export const logoutUserApi = async () => {
+
+    let response;
+    try {
+        response = await api.get('/logout')
     } catch (error) {
         console.log(error)
     }

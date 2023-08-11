@@ -18,23 +18,27 @@ export default function Login() {
   async function onSubmit(data){
     let user = {
       email: data.email,
-      password: data.password
+      password: data.password,
     }
     let res = await loginUserApi(user)
     if(res.status === 200){
-      dispatch(loginUser(user))
+      dispatch(loginUser(res.data.user))
       const originalRoute = localStorage.getItem('originalRoute');    
+
+      // Todo: if record exist in database get record 
+      // if cart in local Storage update database record as well as update local storage 2
+
       if (originalRoute) {
         localStorage.removeItem('originalRoute'); // Remove the stored route
         navigate(originalRoute)
-      } else {
+      }else {
+        console.log('navigate to home')
         navigate('/')
-        
       }
     }
-    else{
+    else if (res.code === 'ERR_BAD_REQUEST') {
       // console.log(res.status, res.message); // when create api
-      setError(' Invalid Credentials')
+      setError(res.response.data.message)
     }
   }
   return (

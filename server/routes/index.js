@@ -1,10 +1,10 @@
 const router = require('express').Router()
 const {upload} = require('../middleware/fileUpdoad')
-const {register, login, logout, changePassword} = require('../controllers/authController')
-const {showAllProducts, showProductById, createProduct, updateProduct, deleteManyProduct, deleteProductById, testingProduct} = require('../controllers/productContorller')
-const { getOrder, getOrderById } = require('../controllers/orderController')
+const {register, login, logout} = require('../controllers/authController')
+const {showAllProducts, showProductById, createProduct, updateProduct, deleteManyProduct, deleteProductById, getAllProducts} = require('../controllers/productContorller')
+const { getOrder, getOrderById, createOrder } = require('../controllers/orderController')
 const { udpateCart, getCarts, getUserCart } = require('../controllers/cartController')
-const { getAllUsers } = require('../controllers/userController')
+const { getAllUsers,updateUser } = require('../controllers/userController')
 const { auth } = require('../middleware/auth')
 
 
@@ -15,21 +15,24 @@ router.get('/',()=>{
 router.post('/register',register)
 router.post('/login',login)
 router.post('/logout',auth,logout)
-router.post('changePassword',auth,changePassword)
 
 // customers
 router.get('/users',auth,getAllUsers)
+router.patch('/updateuser',auth,updateUser)
 
 // products
-router.get('/products',auth,showAllProducts)
-router.get('/product/:id',auth,showProductById)
+router.get('/getProducts',getAllProducts)
+router.get('/products',showAllProducts)
+router.get('/product/:_id',showProductById)
 router.post('/product/add',auth, upload.array('productImages') ,createProduct)
 router.put('/product/update/:id',auth,upload.array('productImages'),updateProduct)
 router.delete('/product/delete/:id',auth,deleteProductById)
 router.delete('/products/delete',auth,deleteManyProduct)
 
-router.get('/orders',auth,getOrder)
+router.post('/ordercreate',auth,createOrder)
 router.get('/order/:id',auth,getOrderById)
+router.get('/orders',auth,getOrder)
+
 
 //carts
 router.get('/carts',auth,getCarts)
@@ -38,6 +41,5 @@ router.get('/cart/:userId',auth,getUserCart)
 
 
 
-router.put('/test/:id',auth,upload.array('productImages'),testingProduct)
 
 module.exports = router

@@ -13,10 +13,7 @@ const Protected = ({children}) => {
             localStorage.setItem('originalRoute', location.pathname);
             return <Navigate to='/login' />
         }
-    // }
-    // useEffect(()=>{
-    //     protect();
-    // },[])
+
 }
 
 export default Protected

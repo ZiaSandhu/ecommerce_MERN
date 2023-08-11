@@ -6,12 +6,12 @@ const Signout = () => {
     const dispatch = useDispatch()
     const navigate = useNavigate()
     useEffect(()=>{
-        dispatch(logoutUser)
+      console.log('signout component')
+        dispatch(logoutUser())
         navigate('/')
-    })
+    },[])
   return (
-//   navigate()
-<></>
+  <></>
   )
 }
 

@@ -22,10 +22,7 @@ export const getProducts = async(filters,sort,paginate) => {
     let response; 
     let query='/products?'
     for (let key in filters){
-        // will un comment when live server here dont work
-        // let value = filters[key].join(',')  
-        let value = [...filters[key]]
-        // let last = value[-1]
+        let value = filters[key].join(',')  
         query += `${key}=${value}&`
     }
     for (let key in sort){
@@ -37,16 +34,25 @@ export const getProducts = async(filters,sort,paginate) => {
     try {
         response  = await api.get(query)        
     } catch (error) {
-        console.log(error)
+        return error
     }
     return response
 } 
 export const getProductById = async(id) => {
     let response; 
     try {
-        response  = await api.get('/products/'+id)
+        response  = await api.get('/product/'+id)
     } catch (error) {
-        console.log(error)
+        return error
+    }
+    return response
+} 
+export const getAllProduct = async() => {
+    let response; 
+    try {
+        response  = await api.get('/getProducts')
+    } catch (error) {
+        return error
     }
     return response
 } 

@@ -1,34 +1,53 @@
-import { Fragment, useEffect } from 'react'
-import { Disclosure, Menu, Transition } from '@headlessui/react'
-import { Bars3Icon, BellIcon, ShoppingCartIcon, XMarkIcon } from '@heroicons/react/24/outline'
-import {NavLink, useLocation} from 'react-router-dom'
+import { Fragment, useEffect } from "react";
+import { Disclosure, Menu, Transition } from "@headlessui/react";
+import {
+  Bars3Icon,
+  BellIcon,
+  ShoppingCartIcon,
+  XMarkIcon,
+} from "@heroicons/react/24/outline";
+import { NavLink } from "react-router-dom";
+import { useSelector, useDispatch } from "react-redux";
 
-import {logoutUser} from '../../store/userSlice'
+import { logoutUser } from "../../store/userSlice";
+import { loginUserApi } from "../../api/internal/userApi";
+
+import {  updateTotal } from '../../store/cartSlice';
+
 const user = {
-  name: 'Tom Cook',
-  email: 'tom@example.com',
+  name: "Tom Cook",
+  email: "tom@example.com",
   imageUrl:
-    'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
-}
+    "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
+};
 let navigation = [
-  { name: 'Ecommerce', href: '/', current: true },
-  { name: 'Products', href: '/products', current: false },
-]
-const userNavigation = [
-  { name: 'Your Profile', href: '#' },
-  { name: 'Settings', href: '#' },
-  { name: 'Sign out', href: '/signout' },
-]
+  { name: "Ecommerce", href: "/", current: true },
+  { name: "Products", href: "/products", current: false },
+];
 
 function classNames(...classes) {
-  return classes.filter(Boolean).join(' ')
+  return classes.filter(Boolean).join(" ");
 }
 
 export default function Navbar() {
-// let location = useLocation()
-// useEffect(()=>{
-//   navigation = navigation.map((nav)=> nav.href === location.pathname ? {...nav, current:true} : {...nav, current:false})
-// },[location.pathname])
+  const dispatch = useDispatch();
+  const auth = useSelector((state) => state.user.auth);
+  const totalItem = useSelector((state) => state.cart.totalItem);
+
+  const userNavigation = [
+    { name: "Your Profile", href: "#" },
+    { name: "Settings", href: "#" },
+    auth
+      ? { name: "Sign out", href: "/login" }
+      : { name: "Login", href: "/login" },
+  ];
+  async function handleSignOut() {
+    await loginUserApi();
+    dispatch(logoutUser());
+  }
+  useEffect(()=>{
+    dispatch(updateTotal())
+  },[])
   return (
     <div className="min-h-full">
       <Disclosure as="nav" className="bg-gray-800">
@@ -78,7 +97,7 @@ export default function Navbar() {
                       />
                     </NavLink>
                     <span className="inline-flex items-center rounded-md mb-7 -ml-3 z-10 bg-red-50 px-2 py-1 text-xs font-medium text-red-700 ring-1 ring-inset ring-red-600/10">
-                      3
+                      {totalItem}
                     </span>
 
                     {/* Profile dropdown */}
@@ -114,6 +133,13 @@ export default function Navbar() {
                                     "block px-4 py-2 text-sm text-gray-700"
                                   )}
                                 >
+                                  {/* {auth && item.name==='Sign out' ? (
+                                    item.name
+                                  ) : (
+                                    <button onClick={handleSignOut}>
+                                      {item.name}
+                                    </button>
+                                  )} */}
                                   {item.name}
                                 </NavLink>
                               )}
@@ -184,20 +210,22 @@ export default function Navbar() {
                     <ShoppingCartIcon className="h-6 w-6" aria-hidden="true" />
                   </NavLink>
                   <span className="inline-flex items-center rounded-md mb-7 -ml-3 z-10 bg-red-50 px-2 py-1 text-xs font-medium text-red-700 ring-1 ring-inset ring-red-600/10">
-                    3
+                    {totalItem}
                   </span>
                 </div>
                 <div className="mt-3 space-y-1 px-2">
                   {userNavigation.map((item) => (
-                    <Disclosure.Button
-                      key={item.name}
-                    >
+                    <Disclosure.Button key={item.name}>
                       <NavLink
-                      to={item.href}
-                      className="block rounded-md px-3 py-2 text-base font-medium text-gray-400 hover:bg-gray-700 hover:text-white"
+                        to={item.href}
+                        className="block rounded-md px-3 py-2 text-base font-medium text-gray-400 hover:bg-gray-700 hover:text-white"
                       >
+                        {/* {auth ? (
+                          item.name
+                        ) : (
+                          <button onClick={handleSignOut}>{item.name}</button>
+                        )} */}
                         {item.name}
-
                       </NavLink>
                     </Disclosure.Button>
                   ))}

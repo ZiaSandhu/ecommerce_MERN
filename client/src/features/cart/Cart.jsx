@@ -1,27 +1,55 @@
 import { NavLink } from 'react-router-dom';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { PlusIcon, MinusIcon } from '@heroicons/react/20/solid'
-
+import { useEffect } from 'react';
+import { addCart } from '../../api/internal/cartApi';
+import { removeItem, decreaseQty, increaseQty, updateTotal, localStorageCart } from '../../store/cartSlice';
 
 export default function Cart() {
 
   const products = useSelector(state => state.cart.cart)
+  const subTotal = useSelector(state => state.cart.subTotal)
+  const dispatch = useDispatch()
+  const id = useSelector(state => state.user.user?.id)
   function increseQty(id) {
-    
+    products.forEach(item => {
+      if(item.itemId === id && item.qty+1 <= item.stock){
+        dispatch(increaseQty(id))
+      }
+    });
   }
-  function decreaseQty(id) {
-    
+  function decreseQty(id) {
+    products.forEach(item => {
+      if(item.itemId === id && item.qty > 1){
+        dispatch(decreaseQty(id));
+      }
+    });
   }
+  function removeProduct(id) {
+    dispatch(removeItem(id))
+  }
+  useEffect(()=>{
+    async function updateCart(){
+      let data={
+        user: id,
+        products
+      }
+      // await addCart(data)
+    }
+    updateCart();
+    dispatch(updateTotal())
+    dispatch(localStorageCart())
+  },[products])
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
       <div className="border-t border-gray-200 px-4 py-6 sm:px-6">
         <h1 className="text-4xl font-bold tracking-tight m-2 text-gray-900">
           Cart
         </h1>
-        <div className="flow-root">
+        {products.length > 0 ?(<div className="flow-root">
           <ul role="list" className="-my-6 divide-y divide-gray-200">
             {products.map((product) => (
-              <li key={product.id} className="flex py-6">
+              <li key={product.itemId} className="flex py-6">
                 <div className="h-24 w-24 flex-shrink-0 overflow-hidden rounded-md border border-gray-200">
                   <img
                     src={product.thumbnail}
@@ -41,7 +69,7 @@ export default function Cart() {
                       <p className="ml-4">${product.price * product.qty}</p>
                     </div>
                     <p className={`mt-1 text-sm text-gray-900`}>
-                      {product.color.name}
+                      {product.color} -- {product.size}
                     </p>
                   </div>
                   <div className="flex flex-1 items-end justify-between text-sm">
@@ -50,7 +78,7 @@ export default function Cart() {
                           <p className='mr-5'>Qty:</p>
                           <button
                             className="p-2 cursor-pointer bg-gray-300 text-gray-900 hover:bg-gray-100"
-                             onClick={decreaseQty(product.id)}
+                             onClick={()=>decreseQty(product.itemId)}
                           >
                             <MinusIcon className="h-2 w-2" />
                           </button>
@@ -59,7 +87,7 @@ export default function Cart() {
                           </p>
                           <button
                             className="p-2 cursor-pointer bg-gray-300 text-gray-900 hover:bg-gray-100"
-                             onClick={product.qty+1}
+                             onClick={()=>increseQty(product.itemId)}
                           >
                             <PlusIcon className="h-2 w-2" />
                           </button>
@@ -67,6 +95,7 @@ export default function Cart() {
 
                     <div className="flex">
                       <button
+                      onClick={()=>removeProduct(product.itemId)}
                         type="button"
                         className="font-medium text-indigo-600 hover:text-indigo-500"
                       >
@@ -78,13 +107,17 @@ export default function Cart() {
               </li>
             ))}
           </ul>
-        </div>
+        </div>) :
+        (
+          <p className='text-center text-gray-900'>No items in Cart</p>
+        )
+        }
       </div>
 
       <div className="border-t border-gray-200 px-4 py-6 sm:px-6">
         <div className="flex justify-between text-base font-medium text-gray-900">
           <p>Subtotal</p>
-          <p>$262.00</p>
+          <p>${subTotal}</p>
         </div>
         <p className="mt-0.5 text-sm text-gray-500">
           Shipping and taxes calculated at checkout.

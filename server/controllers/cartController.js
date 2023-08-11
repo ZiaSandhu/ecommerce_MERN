@@ -10,7 +10,6 @@ const udpateCart = async(req,res,next) => {
                 productId: Joi.string().regex(IdPattern).required(),
                 qty: Joi.number(),
                 price: Joi.number(),
-                subTotal: Joi.number(),
                 variation: Joi.string()
             })
         )
@@ -23,7 +22,6 @@ const udpateCart = async(req,res,next) => {
     let cart,status;
     try {
         cart = await Cart.findOne({userId})
-        console.log("🚀 ~ file: cartController.js:26 ~ udpateCart ~ cart:", cart)
         let newCart;
         if(!cart){
             newCart = new Cart({
@@ -31,7 +29,6 @@ const udpateCart = async(req,res,next) => {
                 products
             })
             cart = await newCart.save();
-            console.log("🚀 ~ file: cartController.js:33 ~ udpateCart ~ cart:", cart)
             
             status = 201
         }

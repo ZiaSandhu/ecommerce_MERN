@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux';
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { StarIcon, PlusIcon, MinusIcon } from '@heroicons/react/20/solid'
 import { RadioGroup } from '@headlessui/react'
 
-import {setProduct} from '../../store/productSlice'
+import {setProductDetail} from '../../store/productSlice'
 import {getProductById} from "../../api/internal/productApi"
 import { addToCart } from '../../store/cartSlice';
 
@@ -42,7 +42,7 @@ function classNames(...classes) {
 export default function ProductDetail() {
   const params = useParams()
   const dispatch = useDispatch();
-
+  const navigate = useNavigate()
 // todo: change following code
   
   const [selectedColor, setSelectedColor] = useState(colors[0])
@@ -51,18 +51,36 @@ export default function ProductDetail() {
   // Upper code is hardcoded data not from api, chages will be applied
 
   useEffect(()=>{
-    (async function(){
+    async function getProductDetail (){
       let response = await getProductById(params.id);
-      dispatch(setProduct(response.data));
-    })();
+      if(response.status === 200){
+        dispatch(setProductDetail(response.data.product));
+      }
+      else if(response.code === 'ERR_BAD_REQUEST'){
+        console.log(response.response.data.message)
+      }
+    };
+    getProductDetail()
   },[dispatch])
 
   const product = useSelector((state) => state.product.productDetail)
 
   const handleAddToCart = () => {
     // e.preventDefault()
-    const cartItem = {...product, color:selectedColor,qty:quantity}
+    const cartItem = {
+      productId:product._id,
+      title:product.title,
+      price:product.price,
+      color: selectedColor.name,
+      thumbnail: product.thumbnail,
+      size: selectedSize.name,
+      qty: quantity,
+      subTotal: quantity*product.price,
+      itemId: `${product._id}-${selectedColor.name}-${selectedSize.name}`,
+    };
+    // todo: api call to add cart to database
     dispatch(addToCart(cartItem))
+    navigate('/cart')
   }
   return (
     <div className="bg-white">

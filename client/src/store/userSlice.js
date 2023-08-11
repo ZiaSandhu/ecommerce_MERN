@@ -1,7 +1,7 @@
 import {createSlice} from '@reduxjs/toolkit'
 
 const initialState = {
-    user: {},
+    user: null,
     auth: false
 }
 
@@ -17,9 +17,13 @@ const userSlice = createSlice({
         logoutUser: (state,action)=>{
             state.user = null
             state.auth = false
+        },
+        udpateAddresses:(state,action)=>{
+            let address = action.payload
+            state.user.shippingAddresses.push(address) 
         }
     }
 })
 
-export const {loginUser,logoutUser} = userSlice.actions;
+export const {loginUser,logoutUser,udpateAddresses} = userSlice.actions;
 export default userSlice.reducer
