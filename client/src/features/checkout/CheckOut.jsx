@@ -6,13 +6,16 @@ import { useForm } from "react-hook-form";
 import { MinusIcon, PlusIcon } from "@heroicons/react/20/solid";
 
 import { updateUser } from "../../api/internal/userApi";
-import { udpateAddresses } from "../../store/userSlice";
-import { updateTotal, resetCart } from "../../store/cartSlice";
+import { updateUserState } from "../../store/userSlice";
+import { updateTotal, resetCart  } from "../../store/cartSlice";
 import { saveOrder } from "../../api/internal/orderApi";
+import { setCurrentOrderId  } from "../../store/orderSlice";
+
 
 export default function CheckOut() {
   const {
     register,
+    reset,
     handleSubmit,
     formState: { errors },
   } = useForm();
@@ -23,28 +26,35 @@ export default function CheckOut() {
   const subTotal = useSelector((state) => state.cart.subTotal);
   const totalAmount = useSelector((state) => state.cart.totalAmount);
   const shippingFee = useSelector((state) => state.cart.shippingFee);
+  const totalItem = useSelector((state) => state.cart.totalItem);
 
   const user = useSelector((state) => state.user.user);
+  
+  const [selectedAddress, setSelectedAddress] = useState(null);
+  const [selectedPaymentMethod, setSelectPaymentMethod] = useState(null);
 
   const [isOpen, setIsOpen] = useState(false);
   function toggleNewAddress() {
     setIsOpen((prev) => !prev);
   }
   async function onSubmit(data) {
+    
     let newUser = {
-      id: user.id,
-      resource: {
-        shippingAddress: user.shippingAddress
-          ? [...user.shippingAddress, data]
-          : data,
-      },
+      userId: user.id,
+      shippingAddress: data ,
+      action:'push'
     };
-    await updateUser(newUser);
-    dispatch(udpateAddresses(data));
+    let res = await updateUser(newUser);
+    if(res.status === 200){
+      dispatch(updateUserState(res.data.updatedUser))
+    }
+    else{
+      // todo set error later
+      return
+    }
+    reset()
   }
 
-  const [selectedAddress, setSelectedAddress] = useState(null);
-  const [selectedPaymentMethod, setSelectPaymentMethod] = useState(null);
 
   function handlePaymentMethodChange(e) {
     setSelectPaymentMethod(e.target.value);
@@ -56,7 +66,7 @@ export default function CheckOut() {
   }
 
   async function proceedOrder() {
-    if (selectedAddress && selectedPaymentMethod) {
+    if (totalItem > 0 && selectedAddress && selectedPaymentMethod) {
       let order = {
         userId: user.id,
         products,
@@ -67,17 +77,19 @@ export default function CheckOut() {
         shippingFee,
         totalAmount,
       };
-      
-      console.log("🚀 ~ file: CheckOut.jsx:72 ~ proceedOrder ~ order:", order)
+      // todo handle stock
       let res = await saveOrder(order);
-      console.log("🚀 ~ file: CheckOut.jsx:71 ~ proceedOrder ~ res:", res)
-
-      //clear cart
-      dispatch(resetCart())
-
-      navigate('/order/success')
+      console.log(res)
+      if(res.status === 201){
+        dispatch(setCurrentOrderId(res.data.order._id))
+        dispatch(resetCart())
+        navigate('/order/success')
+      }
+      else if(['ERR_BAD_REQUEST'].includes(res.code)){
+        //later
+      }
     } else {
-      console.log('select address or shipping fee')
+      console.log('select address or shipping fee or no item in cart')
       //set error later
     }
   }
@@ -85,6 +97,7 @@ export default function CheckOut() {
   useEffect(() => {
     dispatch(updateTotal());
   });
+  
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
       <div className="grid grid-cols-1 gap-x-8 gap-y-10 lg:grid-cols-5">
@@ -188,8 +201,6 @@ export default function CheckOut() {
                         <select
                           {...register("country")}
                           id="country"
-                          name="country"
-                          autoComplete="country-name"
                           className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:max-w-xs sm:text-sm sm:leading-6"
                         >
                           <option>United States</option>
@@ -277,6 +288,7 @@ export default function CheckOut() {
                   </div>
                   <div className="mt-6 flex items-center justify-end gap-x-6">
                     <button
+                    onClick={()=>reset()}
                       type="button"
                       className="text-sm font-semibold leading-6 text-gray-900"
                     >
@@ -292,6 +304,7 @@ export default function CheckOut() {
                 </form>
               )}
             </div>
+            {/* mapping addresses */}
             <div className="border-b border-gray-900/10 pb-12">
               <h2 className="text-base font-semibold leading-7 text-gray-900">
                 Address
@@ -340,7 +353,7 @@ export default function CheckOut() {
               ) : (
                 <p className="mt-5">No saved addresses</p>
               )}
-
+              {/* order options */}
               <div className="mt-10 space-y-10">
                 <fieldset>
                   <legend className="text-sm font-semibold leading-6 text-gray-900">

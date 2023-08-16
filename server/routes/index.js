@@ -2,7 +2,7 @@ const router = require('express').Router()
 const {upload} = require('../middleware/fileUpdoad')
 const {register, login, logout} = require('../controllers/authController')
 const {showAllProducts, showProductById, createProduct, updateProduct, deleteManyProduct, deleteProductById, getAllProducts} = require('../controllers/productContorller')
-const { getOrder, getOrderById, createOrder } = require('../controllers/orderController')
+const { getOrder, getOrderById, createOrder, getUserOrder } = require('../controllers/orderController')
 const { udpateCart, getCarts, getUserCart } = require('../controllers/cartController')
 const { getAllUsers,updateUser } = require('../controllers/userController')
 const { auth } = require('../middleware/auth')
@@ -29,10 +29,11 @@ router.put('/product/update/:id',auth,upload.array('productImages'),updateProduc
 router.delete('/product/delete/:id',auth,deleteProductById)
 router.delete('/products/delete',auth,deleteManyProduct)
 
+// orders
 router.post('/ordercreate',auth,createOrder)
 router.get('/order/:id',auth,getOrderById)
+router.get('/order/user/:id',auth,getUserOrder)
 router.get('/orders',auth,getOrder)
-
 
 //carts
 router.get('/carts',auth,getCarts)

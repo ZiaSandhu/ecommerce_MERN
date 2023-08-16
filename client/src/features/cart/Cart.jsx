@@ -1,4 +1,4 @@
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { PlusIcon, MinusIcon } from '@heroicons/react/20/solid'
 import { useEffect } from 'react';
@@ -6,10 +6,11 @@ import { addCart } from '../../api/internal/cartApi';
 import { removeItem, decreaseQty, increaseQty, updateTotal, localStorageCart } from '../../store/cartSlice';
 
 export default function Cart() {
-
+  const dispatch = useDispatch()
+  const navigate = useNavigate()
   const products = useSelector(state => state.cart.cart)
   const subTotal = useSelector(state => state.cart.subTotal)
-  const dispatch = useDispatch()
+  const totalItem = useSelector(state => state.cart.totalItem)
   const id = useSelector(state => state.user.user?.id)
   function increseQty(id) {
     products.forEach(item => {
@@ -27,6 +28,14 @@ export default function Cart() {
   }
   function removeProduct(id) {
     dispatch(removeItem(id))
+  }
+  function handleProceedCheckout(){
+    if(totalItem > 0){
+      navigate('/checkout')
+    }
+    else{
+      navigate('/')
+    }
   }
   useEffect(()=>{
     async function updateCart(){
@@ -123,12 +132,12 @@ export default function Cart() {
           Shipping and taxes calculated at checkout.
         </p>
         <div className="mt-6">
-          <NavLink
-            to="/checkout"
-            className="flex items-center justify-center rounded-md border border-transparent bg-indigo-600 px-6 py-3 text-base font-medium text-white shadow-sm hover:bg-indigo-700"
+          <button
+          onClick={handleProceedCheckout}
+            className=" w-full flex items-center justify-center rounded-md border border-transparent bg-indigo-600 px-6 py-3 text-base font-medium text-white shadow-sm hover:bg-indigo-700"
           >
             Checkout
-          </NavLink>
+          </button>
         </div>
         <div className="mt-6 flex justify-center text-center text-sm text-gray-500">
           <p>

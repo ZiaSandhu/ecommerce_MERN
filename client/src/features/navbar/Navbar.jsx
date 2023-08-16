@@ -35,14 +35,14 @@ export default function Navbar() {
   const totalItem = useSelector((state) => state.cart.totalItem);
 
   const userNavigation = [
-    { name: "Your Profile", href: "#" },
-    { name: "Settings", href: "#" },
-    auth
-      ? { name: "Sign out", href: "/login" }
-      : { name: "Login", href: "/login" },
+    {id:"profile", name: "Your Profile", href: "/user/profile" },
+    {id:'setting', name: "Settings", href: "#" },
+    {id:'orders', name: "Orders", href: "/orders" },
+    // {id:'signout', name: "Sign out", href: "/signout" },
+    {id:'login', name: "Login", href: "/login" },
   ];
   async function handleSignOut() {
-    await loginUserApi();
+    // await loginUserApi();
     dispatch(logoutUser());
   }
   useEffect(()=>{

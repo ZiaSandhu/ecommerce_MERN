@@ -18,12 +18,12 @@ const userSlice = createSlice({
             state.user = null
             state.auth = false
         },
-        udpateAddresses:(state,action)=>{
-            let address = action.payload
-            state.user.shippingAddresses.push(address) 
+        updateUserState:(state,action)=>{
+            console.log(action.payload)
+            state.user = action.payload
         }
     }
 })
 
-export const {loginUser,logoutUser,udpateAddresses} = userSlice.actions;
+export const {loginUser,logoutUser,updateUserState} = userSlice.actions;
 export default userSlice.reducer

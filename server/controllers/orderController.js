@@ -24,23 +24,39 @@ const getOrder = async(req,res,next) => {
     res.status(200).json({msg:"Get all Orders",orders})
 
 }
-
-const getOrderById = async(req,res,next) => {
+const getUserOrder = async(req,res,next) => {
     let orders;
-    const result = idSchema(req.params.id)
+    const result = idSchema(req.params)
+    const {id} = req.params
     if(result === true){
-
         try {
-            orders = await Order.find({})
+            orders = await Order.find({userId:id})
         } catch (error) {
             return next(error)
         }
-
+        res.status(200).json({msg:"Get my Orders",orders})
     }
     else{
         return next(result)
     }
-    res.status(200).json({msg:"Get all Orders",orders})
+}
+
+const getOrderById = async(req,res,next) => {
+    let order;
+    const result = idSchema(req.params.id)
+    if(result === true){
+
+        try {
+            order = await Order.find({_id:req.params.id})
+        } catch (error) {
+            return next(error)
+        }
+
+        res.status(200).json({msg:"Get Order Summary",order})
+    }
+    else{
+        return next(result)
+    }
 
 }
 
@@ -107,5 +123,6 @@ module.exports = {
     getOrder,
     getOrderById,
     createOrder,
-    deleteOrder
+    deleteOrder,
+    getUserOrder
 }

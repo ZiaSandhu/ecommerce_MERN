@@ -5,6 +5,7 @@ class UserDto{
         this.id = user._id
         this.shippingAddresses = user.shippingAddresses ||  []
         this.favourites = user.favourites || []
+        this.role = user.role
     }
 }
 

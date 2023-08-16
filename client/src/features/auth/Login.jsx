@@ -32,7 +32,6 @@ export default function Login() {
         localStorage.removeItem('originalRoute'); // Remove the stored route
         navigate(originalRoute)
       }else {
-        console.log('navigate to home')
         navigate('/')
       }
     }
