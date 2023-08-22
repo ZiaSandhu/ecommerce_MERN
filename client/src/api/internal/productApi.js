@@ -56,3 +56,13 @@ export const getAllProduct = async() => {
     }
     return response
 } 
+
+export const addProductApi = async(data) => {
+    let response 
+    try {
+        response = await api.post('/product/add',data)
+    } catch (error) {
+        return error.response
+    }
+    return response
+}

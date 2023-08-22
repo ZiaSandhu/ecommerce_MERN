@@ -1,18 +1,19 @@
 import React, { useEffect } from 'react'
 import { logoutUser } from '../../store/userSlice'
-import { useDispatch } from 'react-redux'
-import { useNavigate } from 'react-router-dom'
+import { useDispatch, useSelector } from 'react-redux'
+import { Navigate } from 'react-router-dom'
 const Signout = () => {
     const dispatch = useDispatch()
-    const navigate = useNavigate()
+    const auth = useSelector(state => state.user.auth)
     useEffect(()=>{
-      console.log('signout component')
-        dispatch(logoutUser())
-        navigate('/')
+      dispatch(logoutUser())
     },[])
-  return (
-  <></>
-  )
+    return(
+      <>
+      { !auth && <Navigate to='/' /> }
+      </>
+    )
+  
 }
 
 export default Signout

@@ -5,7 +5,7 @@ const initialState = {
     categories: [],
     brands: [],
     productDetail: {},
-    allProducts: []
+    allCategoryBrands: []
 }
 
 const productSlice = createSlice({
@@ -17,54 +17,55 @@ const productSlice = createSlice({
             state.products = products
             state.totalProducts = totalProducts
         },
-        setCategory: (state, action) => {
-            let categories = state.allProducts.map((prod) => prod.category)
-            categories = [...new Set([...categories])]
+        
+        filterBrands: (state, action) => {
+                let brand = state.allCategoryBrands.filter((item) => action.payload.includes(item.cat)).map(item => item.brand) 
+                brand = [...new Set([...brand])]
+                state.brands = brand.map((item) => {
+                    return {
+                        value: item,
+                        label: item.toUpperCase()
+                    }
+                })
+        },
+        setProductDetail: (state, action) => {
+            state.productDetail = action.payload
+        },
+        setAllCategoryBrands: (state, action) => {
+            let data = action.payload
+            data = data.map(item => {
+                let cat = item.category
+                let brand = item.brand
+                return {
+                    cat,brand
+                }
+            })
+            const uniqueSet = new Set(data.map(JSON.stringify));
+             state.allCategoryBrands = Array.from(uniqueSet).map(JSON.parse);
 
+            let categories = state.allCategoryBrands.map((prod) => prod.cat)
+            categories = [...new Set([...categories])]
             state.categories = categories.map((item) => {
                 return {
                     value: item,
                     label: item.split('-').join(' ').toUpperCase()
                 }
             })
-        },
-        setBrand: (state, action) => {
-            if (!action.payload) {
-                let brand = state.allProducts.map((prod) => prod.brand)
-                brand = [...new Set([...brand])]
+            let brands = state.allCategoryBrands.map((prod) => prod.brand)
+            brands = [...new Set([...brands])]
 
-                state.brands = brand.map((item) => {
-                    return {
-                        value: item,
-                        label: item.toUpperCase()
-                    }
-                })
-            }
-            else {
-                let brand = state.allProducts
-                    .filter((prod) => action.payload.includes(prod.category)) 
-                    .map((prod) => prod.brand);
-                brand = [...new Set([...brand])]
-                console.log("🚀 ~ file: productSlice.js:50 ~ brand:", brand)
-
-                state.brands = brand.map((item) => {
-                    return {
-                        value: item,
-                        label: item.toUpperCase()
-                    }
-                })
-            }
-        },
-        setProductDetail: (state, action) => {
-            state.productDetail = action.payload
-        },
-        setAllProducts: (state, action) => {
-            state.allProducts = action.payload
+            state.brands = brands.map((item) => {
+                return {
+                    value: item,
+                    label: item.split('-').join(' ').toUpperCase()
+                }
+            })
+            
         }
 
     }
 })
 
-export const { setProducts: setProducts, setCategory, setBrand, setProductDetail, setAllProducts } = productSlice.actions
+export const { setProducts: setProducts,  filterBrands, setProductDetail, setAllCategoryBrands } = productSlice.actions
 
 export default productSlice.reducer

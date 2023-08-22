@@ -1,13 +1,13 @@
-import React, { useState, Fragment, useEffect} from 'react';
-import { useSelector, useDispatch } from 'react-redux';
 
 import { Dialog, Disclosure, Menu, Transition } from '@headlessui/react'
 import { StarIcon, XMarkIcon } from '@heroicons/react/24/outline'
 import { ChevronDownIcon, FunnelIcon, MinusIcon, PlusIcon, Squares2X2Icon } from '@heroicons/react/20/solid'
-import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/20/solid'
-import {NavLink} from 'react-router-dom'
+import { ChevronLeftIcon, ChevronRightIcon, PencilSquareIcon } from '@heroicons/react/20/solid'
+import { useNavigate} from 'react-router-dom'
 
-import {setProducts, filterBrands,  setAllCategoryBrands} from '../../store/productSlice'
+import React, { useState, Fragment, useEffect} from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import {setProducts, filterBrands, setAllCategoryBrands} from '../../store/productSlice'
 import { getProducts,getAllProduct } from "../../api/internal/productApi";
 
 const sortOptions = [
@@ -23,8 +23,10 @@ const sortOptions = [
 function classNames(...classes) {
   return classes.filter(Boolean).join(' ')
 }
-export default function Products() {
+export default function AdminProducts() {
   const dispatch = useDispatch();
+  const navigate = useNavigate()
+
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const [filter, setFilter] = useState({});
   const [sort, setSort] = useState({});
@@ -32,6 +34,24 @@ export default function Products() {
     _page:1,
     _limit:10,
   })
+
+  const products = useSelector((state) => state.product.products);
+  const totalProducts = useSelector((state) => state.product.totalProducts);
+  const categories = useSelector((state) => state.product.categories);
+  const brands = useSelector((state) => state.product.brands);
+  const filters = [
+    {
+      id: "category",
+      name: "Category",
+      options: categories,
+    },
+    {
+      id: "brand",
+      name: "Brands",
+      options: brands,
+    },
+  ];
+
 
 
   const handleFilter = (e,section) => {
@@ -99,24 +119,8 @@ export default function Products() {
     },
     []
   )
-  const products = useSelector((state) => state.product.products);
-  const totalProducts = useSelector((state) => state.product.totalProducts);
-  const categories = useSelector((state) => state.product.categories);
-  const brands = useSelector((state) => state.product.brands);
-  const filters = [
-    {
-      id: "category",
-      name: "Category",
-      options: categories
-    },
-    {
-      id: "brand",
-      name: "Brands",
-      options: brands
-    },
-  ];
+
   return (
-    <div>
       <div className="bg-white">
         <div>
           {/* Mobile filter dialog */}
@@ -125,7 +129,7 @@ export default function Products() {
           <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="flex items-baseline justify-between border-b border-gray-200 pb-6 pt-10">
               <h1 className="text-4xl font-bold tracking-tight text-gray-900">
-                All Products
+                Admin Products
               </h1>
 
               {/* Sorting */}
@@ -140,13 +144,23 @@ export default function Products() {
               <h2 id="products-heading" className="sr-only">
                 Products
               </h2>
-
+              <div className='flex flex-row-reverse'>
+              <button
+                onClick={()=>{
+                  navigate('/admin/productform')
+                }}
+                className="inline-flex  items-center rounded-md mb-2 bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-green-200 hover:text-green-900 "
+              >
+                <PlusIcon className="-ml-0.5 mr-1.5 h-5 w-5 opacity-70" />
+                Add Address
+              </button>
+              </div>
               <div className="grid grid-cols-1 gap-x-8 gap-y-10 lg:grid-cols-4">
                 {/* Filters */}
                 <DesktopFilter filters={filters} filter={filter} handleFilter={handleFilter} />
-                
+
                 {/* Product grid */}
-                {products.length > 0 ? <ProductGrid products={products}/> : <p>No Product to Display</p>}
+                {products.length > 0 ? <ProductGrid products={products} /> : <p>No Product to Display</p>}
                 {/* //product grid end */}
               </div>
             </section>
@@ -156,49 +170,44 @@ export default function Products() {
           </main>
         </div>
       </div>
-    </div>
   );
 }
 function ProductGrid({products}) {
+  const navigate = useNavigate()
   return (
-    <div className="lg:col-span-3">
-      {" "}
-      <div className="bg-white">
-        <div className="mx-auto max-w-2xl px-4 py-1 sm:px-6 sm:py-1 lg:max-w-7xl lg:px-8">
-          <div className="mt-6 grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 xl:gap-x-8">
-            {products.map((product) => (
-              <div
-                key={product._id}
-                className="group relative border-solid border-2 border-black-300 p-2"
-              >
-                <div className="aspect-h-1 aspect-w-1 w-full overflow-hidden rounded-md bg-gray-200 lg:aspect-none group-hover:opacity-75 lg:h-60">
-                  <img
-                    src={product.thumbnail}
-                    alt={product.title}
-                    className="h-full w-full object-cover object-center lg:h-full lg:w-full"
-                  />
-                </div>
-                <div className="mt-4 flex justify-between">
-                  <div>
-                    <h3 className="text-sm text-gray-700">
-                      <NavLink to={`/product/${product._id}`} >
-                        <span aria-hidden="true" className="absolute inset-0" />
-                        {product.title}
-                      </NavLink>
-                    </h3>
-                    <p className="mt-1 text-sm text-gray-500">
-                      {product.rating}
-                    </p>
-                  </div>
-                  <p className="text-sm font-medium text-gray-900">
-                    ${product.price}
-                  </p>
-                </div>
+    <div className="col-span-3">
+      <ul role="list" className="block divide-y divide-gray-100">
+        {products.map((product) => (
+          <li key={product._id} className="flex justify-between gap-x-6 py-5">
+            <div className="flex min-w-10 gap-x-4">
+              <img
+                className="h-12 w-12 flex-none rounded-full bg-gray-50"
+                src={product.thumbnail}
+                alt=""
+              />
+              <div className="min-w-0 flex-auto">
+                <p className="text-sm font-semibold leading-6 text-gray-900">
+                  {product.title}
+                </p>
+                <p className="mt-1 truncate text-xs leading-5 text-gray-500">
+                  ${product.price}
+                </p>
               </div>
-            ))}
-          </div>
-        </div>
-      </div>
+            </div>
+            <div className="shrink-0 sm:flex sm:flex-col sm:items-end">
+            <button
+            onClick={()=>{
+              navigate('/admin/productform',{state: {product}})
+            }}
+                className="inline-flex  items-center rounded-md mb-2 bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-green-200 hover:text-green-900 "
+              >
+                <PencilSquareIcon className="-ml-0.5 mr-1.5 h-5 w-5 opacity-70" />
+                Edit
+              </button>
+            </div>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }
@@ -315,7 +324,6 @@ function MobileFilter({filters,handleFilter, mobileFiltersOpen, setMobileFilters
 function DesktopFilter({filters,filter,handleFilter}) {
   return (
     <form className="hidden lg:block">
-      <h3 className='text-base font-semibold border-b border-gray-400 mt-3'>Filter By</h3>
       {filters.map((section) => (
         <Disclosure
           as="div"
@@ -490,13 +498,7 @@ function Sorting({sortOptions,handleSort,setMobileFiltersOpen}) {
                   </Transition>
                 </Menu>
 
-                <button
-                  type="button"
-                  className="-m-2 ml-5 p-2 text-gray-400 hover:text-gray-500 sm:ml-7"
-                >
-                  <span className="sr-only">View grid</span>
-                  <Squares2X2Icon className="h-5 w-5" aria-hidden="true" />
-                </button>
+                
                 <button
                   type="button"
                   className="-m-2 ml-4 p-2 text-gray-400 hover:text-gray-500 sm:ml-6 lg:hidden"

@@ -1,4 +1,4 @@
-[{
+let products = [{
   title: 'iPhone 9',
   description: 'An apple mobile which is nothing like apple',
   price: 549,
@@ -1632,3 +1632,16 @@
       'https://i.dummyjson.com/data/products/100/3.jpg',
       'https://i.dummyjson.com/data/products/100/thumbnail.jpg']
 }]
+let catBrand = products.map(item => {
+  let brand = item.brand
+  let category =  item.category
+  return {
+    brand,
+    category
+  }
+})
+const uniqueSet = new Set(catBrand.map(JSON.stringify));
+
+// Convert the Set back to an array
+const uniqueObjects = Array.from(uniqueSet).map(JSON.parse);
+console.log(uniqueObjects)
