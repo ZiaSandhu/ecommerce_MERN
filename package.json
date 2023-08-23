@@ -1,0 +1,16 @@
+{
+  "name": "ecommerce_app",
+  "version": "1.0.0",
+  "scripts": {
+    "start": "concurrently \"npm run start-client\" \"npm run start-server\" ",
+    "start-client": "cd client && npm start",
+    "start-server": "cd server && npm run dev",
+    "init":"concurrently \"npm run initclient\" \"npm run initserver\" ",
+    "initserver":"cd server && npm install",
+    "initclient":"cd server && npm install"
+  },
+  "keywords": [],
+  "devDependencies": {
+    "concurrently": "^8.2.1"
+  }
+}

@@ -25,7 +25,7 @@ router.get('/getProducts',getAllProducts)
 router.get('/products',showAllProducts)
 router.get('/product/:_id',showProductById)
 router.post('/product/add',auth ,createProduct)
-router.put('/product/update/:id',auth,upload.array('productImages'),updateProduct)
+router.put('/product/update/:id',auth,updateProduct)
 router.delete('/product/delete/:id',auth,deleteProductById)
 router.delete('/products/delete',auth,deleteManyProduct)
 

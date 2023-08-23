@@ -5,26 +5,30 @@ import { useDropzone } from "react-dropzone";
 import { useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
 import { filterBrands } from "../../store/productSlice";
-import { addProductApi } from "../../api/internal/productApi";
+import { addProductApi, updateProductApi } from "../../api/internal/productApi";
+import { XMarkIcon } from "@heroicons/react/24/outline";
+import DialogBox from "../DialogBox";
 
 export default function AdminProductForm() {
   const location = useLocation();
   const dispatch = useDispatch();
-  const product = location.state?.product;
+  let product = location.state?.product;
   const categories = useSelector((state) => state.product.categories);
   const [selectedCategory, setSelectedCategory] = useState("smartphones");
   const brands = useSelector((state) => state.product.brands);
   const [thumbnail, setThumbnail] = useState(product?.thumbnail);
   const [images, setImages] = useState(product?.images);
 
+
+  const [status, setStatus] = useState(null)
   useEffect(() => {
     dispatch(filterBrands(selectedCategory));
-  }, [selectedCategory]);
-
+  }, [selectedCategory,dispatch]);
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    setValue,
+    // formState: { errors },
   } = useForm({
     defaultValues: {
       title: product?.title,
@@ -32,12 +36,22 @@ export default function AdminProductForm() {
       price: product?.price,
       category: product?.category,
       brand: product?.brand,
-      discount: product?.discountPercentage,
+      discountPercentage: product?.discountPercentage,
       stock: product?.stock,
-      // price: product?.price,
     }
   });
-
+  const clearAllFields = () => {
+    
+    product = null
+    setValue('title','')
+    setValue('description','')
+    setValue('category','smartphones')
+    setValue('price',undefined)
+    setValue('stock',undefined)
+    setValue('discountPercentage',0)
+    setImages(null)
+    setThumbnail(null)
+  };
   const onDropThumbnail = useCallback((acceptedFiles) => {
     console.log("Thumbnail files:", acceptedFiles[0]);
     const reader = new FileReader();
@@ -76,20 +90,39 @@ export default function AdminProductForm() {
   });
 
   const addProduct = async (data) => {
-    let product = {...data, thumbnail, images}
+    let updatedData = {
+      ...data, thumbnail, images,
+      price: Number(data.price),
+      stock: Number(data.stock),
+      discountPercentage: Number(data.discountPercentage),
+    }
     let res;
     try {
-      res = await addProductApi(product);
+      if(product){
+        res = await updateProductApi(product._id,updatedData)
+      }else{
+        console.log('add')
+        res = await addProductApi(updatedData);
+      }
     } catch (error) {
       res = error;
     }
-    console.log(res)
+    clearAllFields()
+    setStatus(res.data.msg)
   };
 
+  if(status){
+    setTimeout(() => {
+      setStatus(null)
+    }, 3000);
+  }
   return (
     <div className="mx-auto max-w-5xl px-4 sm:px-6 py-5 lg:px-8 bg-gray-100">
       <form onSubmit={handleSubmit(addProduct)} encType="multipart/form-data">
         <div className="border-b border-gray-900/10 pb-12 ">
+          {status && 
+            <DialogBox heading={status} />
+          }
           <h2 className="text-3xl font-semibold leading-7 text-gray-900">
             {product ? "Edit Product" : "Add Product"}
           </h2>
@@ -210,19 +243,18 @@ export default function AdminProductForm() {
             {/* discount percentage */}
             <div className="sm:col-span-2">
               <label
-                htmlFor="discount"
+                htmlFor="discountPercentage"
                 className="block text-sm font-medium leading-6 text-gray-900"
               >
                 Discount Percentage
               </label>
               <div className="mt-2">
                 <input
-                  id="discount"
+                  id="discountPercentage"
                   {...register("discountPercentage", { min: 0, max: 100 })}
-                  min={0}
-                  max={100}
                   defaultValue={0}
                   type="number"
+                  step={0.01}
                   className="block px-3 w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                 />
               </div>
@@ -259,7 +291,6 @@ export default function AdminProductForm() {
                 >
                   <input
                     {...thumbnailDropzone.getInputProps()}
-                    {...register("thumbnail")}
                   />
                   {!thumbnail ? (
                     <PhotoIcon
@@ -267,14 +298,16 @@ export default function AdminProductForm() {
                       aria-hidden="true"
                     />
                   ) : (
-                    <div>
+                    <div className="relative inline-block bg-white">
                       <img
-                        className="mx-auto h-24 w-24 text-gray-300 rounded"
+                        className="mx-auto h-24 w-24 text-gray-300 rounded "
                         src={thumbnail}
                         alt=""
                       />
                       {/* todo implement cancel option */}
-                      {/* <span className="">close</span> */}
+                      <button className="absolute top-0 right-0 z-20 cursor-default">
+                        <XMarkIcon className="h-5 w-5 hover:text-red-500" />{" "}
+                      </button>
                     </div>
                   )}
                   <p className=" text-sm relative  rounded-md bg-transparent ">
@@ -308,16 +341,29 @@ export default function AdminProductForm() {
                 >
                   <input
                     {...imagesDropzone.getInputProps()}
-                    {...register("images")}
                   />
-                  {thumbnail && (
+                  {!images ? (
                     <PhotoIcon
                       className="mx-auto h-12 w-12 text-gray-300"
                       aria-hidden="true"
                     />
-                    // todo implement images display
-                  )
-                  }
+                  ) : (
+                    <div className="inline-flex gap-4">
+                      {images.map((item,index) => (
+                        <div key={index} className="relative inline-block bg-white">
+                          <img
+                            className="mx-auto h-24 w-24 text-gray-300 rounded "
+                            src={item}
+                            alt=""
+                          />
+                          {/* todo implement cancel option */}
+                          <button className="absolute top-0 right-0 z-20 cursor-default">
+                            <XMarkIcon className="h-5 w-5 font-semibold hover:text-red-600" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                   <p className=" text-sm relative  rounded-md bg-transparent ">
                     <span className="text-indigo-600 font-semibold cursor-pointer hover:text-indigo-500">
                       Upload a file
@@ -325,9 +371,9 @@ export default function AdminProductForm() {
                     &nbsp; or drag and drop
                   </p>
                   <p className="text-xs leading-5 text-gray-600">
-                    Allowed file types:{" "}
+                    Allowed file types:
                     <span className="text-gray-900">PNG, JPG, GIF</span>
-                    <br /> Mulitple Files Allowed
+                    <br /> Max 4 Files.
                   </p>
                   <p className="text-xs leading-5 text-gray-600">
                     Other file types will be rejected
@@ -341,6 +387,7 @@ export default function AdminProductForm() {
         <div className="mt-6 flex items-center justify-end gap-x-6">
           <button
             type="button"
+            onClick={clearAllFields}
             className="text-sm font-semibold leading-6 text-gray-900"
           >
             Cancel

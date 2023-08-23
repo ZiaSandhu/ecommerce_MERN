@@ -66,3 +66,12 @@ export const addProductApi = async(data) => {
     }
     return response
 }
+export const updateProductApi = async(id,data) => {
+    let response 
+    try {
+        response = await api.put(`/product/update/${id}`,data)
+    } catch (error) {
+        return error.response
+    }
+    return response
+}

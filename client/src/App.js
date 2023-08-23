@@ -14,6 +14,7 @@ import AdminProduct from './features/admin/AdminProduct'
 import AdminOrderList from './features/admin/AdminOrder';
 import Products from './features/product/Products';
 import AdminProductForm from './features/admin/AdminProductForm';
+import Footer from './features/footer/Footer';
 function App() {
   return (
     <BrowserRouter>
@@ -36,6 +37,7 @@ function App() {
         <Route path='/admin/productform' element={<Protected> <AdminProtected ><AdminProductForm /> </AdminProtected> </Protected>} />
         <Route path='*' element={<ErrorPage />} />
       </Routes>
+      <Footer />
     </BrowserRouter>
   );
 }

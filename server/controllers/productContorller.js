@@ -3,6 +3,7 @@ const Product = require('../models/Product')
 const ProductDto = require('../dto/productDto')
 const { BASE_URL } = require('../config/index')
 const fs = require('fs')
+// const { patch } = require('../routes')
 const IdPattern = /^[a-fA-F0-9]{24}$/
 
 const showAllProducts = async (req, res, next) => {
@@ -55,8 +56,6 @@ const showProductById = async (req, res, next) => {
     res.status(200).json({ msg: "Show product by Id", product: new ProductDto(product) })
 }
 const createProduct = async (req, res, next) => {
-    console.log("🚀 ~ file: productContorller.js:58 ~ createProduct ~ req.body:", req.body)
-    console.log("🚀 ~ file: productContorller.js:58 ~ createProduct ~ req.files:", req.files)
 
     const createProductSchema = Joi.object({
         title: Joi.string().required(),
@@ -65,7 +64,7 @@ const createProduct = async (req, res, next) => {
         category: Joi.string().required(),
         discountPercentage: Joi.number().default(0),
         price: Joi.number().required(),
-        stock: Joi.number().required(0),
+        stock: Joi.number().required(),
         thumbnail: Joi.string().required(),
         images: Joi.array()
     })
@@ -76,13 +75,14 @@ const createProduct = async (req, res, next) => {
     const { title, brand, category, discountPercentage, price, stock, description, thumbnail, images } = req.body
 
     const thumbnailBuffer = Buffer.from(thumbnail.replace(/^data:image\/(png|jpg|jpeg);base64,/, ""), 'base64');
-    const thumbnailPath = `assets/${Date.now()}-${title}.png`
+    let thumbnailPath = `assets/${Date.now()}-${title}.png`
     //  storing thumbnail
     try {
         fs.writeFileSync(thumbnailPath, thumbnailBuffer)
     } catch (error) {
         return next(error)
     }
+    thumbnailPath = BASE_URL + thumbnailPath
     let imageArray = []
     images.forEach((item, index) => {
         const imageBuffer = Buffer.from(item.replace(/^data:image\/(png|jpg|jpeg);base64,/, ""), 'base64');
@@ -96,8 +96,8 @@ const createProduct = async (req, res, next) => {
         imageArray.push(`${BASE_URL}/${imagePath}`)
     });
     const newProduct = new Product({
-        title, brand, category, discountPercentage, price, stock, description, 
-        images: imageArray, 
+        title, brand, category, discountPercentage, price, stock, description,
+        images: imageArray,
         thumbnail: thumbnailPath
     })
     let product;
@@ -109,76 +109,117 @@ const createProduct = async (req, res, next) => {
     res.status(200).json({ msg: "Product Saved", product: new ProductDto(product) })
 }
 const updateProduct = async (req, res, next) => {
+
     const updateProductSchema = Joi.object({
-        name: Joi.string(),
-        company: Joi.string(),
-        category: Joi.string(),
-        isFeatured: Joi.boolean(),
-        rating: Joi.number(),
-        reviews: Joi.number(),
-        discount: Joi.number(),
-        price: Joi.number(),
-        variations: Joi.array().items(Joi.object().keys({
-            color: Joi.string(),
-            stock: Joi.number()
-        }))
+        title: Joi.string().required(),
+        brand: Joi.string().required(),
+        description: Joi.string().required(),
+        category: Joi.string().required(),
+        discountPercentage: Joi.number().default(0),
+        price: Joi.number().required(),
+        stock: Joi.number().required(),
+        thumbnail: Joi.string().required(),
+        images: Joi.array()
     })
     const { error } = updateProductSchema.validate(req.body)
     if (error) {
         return next(error)
     }
     const { id } = req.params
-    const { name, company, category, variations, isFeatured, rating, reviews, discount, price } = req.body
-    const files = req.files
-    let product, imagesArray;
+    const { title,
+        brand,
+        category,
+        discountPercentage,
+        price,
+        stock,
+        description,
+        thumbnail,
+        images } = req.body
+
+    let product, oldThumbnailPath, oldImagesArray;
     try {
         product = await Product.findOne({ _id: id })
     } catch (error) {
         return next(error)
     }
-
-    if (files) {
-        imagesArray = product.images.length === 0 ? [] : product.images;
-        if (imagesArray.length !== 0) {
-            imagesArray.forEach((url) => {
-                const regex = /assets\/.*/;
-                let path = regex.exec(url)
-                fs.unlink(path[0], (err) => {
-                    if (err) {
-                        if (err.code === 'ENOENT') {
-                            console.log('File does not exist.');
-                        } else {
-                            console.error('Error deleting the file:', err);
-                        }
-                    } else {
-                        console.log('File deleted successfully.');
-                    }
-                });
-            })
-        }
-        imagesArray = []
-        files.forEach((file) => {
-            path = `${BASE_URL}/${file.path}`
-            imagesArray.push(path)
-        });
-    }
+    oldThumbnailPath = product.thumbnail
+    oldImagesArray = product.images
+    const regex = /\assets\/(.+)/;
+    // deleting old thumbnail from memory
     try {
-        await Product.updateOne({ _id: id },
-            {
-                name,
-                company,
-                category,
-                isFeatured,
-                images: imagesArray,
-                rating,
-                reviews,
-                discount,
-                price,
-                variations
-            })
+        let match = oldThumbnailPath.match(regex)
+        if(match){
+            let path = match[0]
+            if(fs.existsSync(path)){
+                fs.unlinkSync(path)
+            }
+        }
     } catch (error) {
         return next(error)
     }
+    // deleting old images from memory
+    try {
+        for (let index = 0; index < oldImagesArray.length; index++) {
+            let image = oldImagesArray[index];
+            let match = image.match(regex)
+            if(match){
+                let path = match[0]
+                if(fs.existsSync(path)){
+                    fs.unlinkSync(path)
+                }
+            }
+        }
+    } catch (error) {
+        return next(error)
+    }
+    // todo if image or thumbnail contain url instead of base 64 string
+    let thumbnailPath
+    const base64Pattern = /^data:image\/(png|jpg|jpeg);base64,/;
+    if (base64Pattern.exec(thumbnail)) {
+        const thumbnailBuffer = Buffer.from(thumbnail.replace(/^data:image\/(png|jpg|jpeg);base64,/, ""), 'base64');
+        thumbnailPath = `assets/${Date.now()}-${title}.png`
+        //  storing thumbnail
+        try {
+            fs.writeFileSync(thumbnailPath, thumbnailBuffer)
+        } catch (error) {
+            return next(error)
+        }
+        thumbnailPath = BASE_URL + thumbnailPath
+    }
+    else{
+        thumbnailPath = thumbnail
+    }
+    let imageArray = []
+    if (base64Pattern.exec(images[0])) {
+        images.forEach((item, index) => {
+            const imageBuffer = Buffer.from(item.replace(/^data:image\/(png|jpg|jpeg);base64,/, ""), 'base64');
+            const imagePath = `assets/${Date.now()}-${title}-${index}.png`
+            //  storing thumbnail
+            try {
+                fs.writeFileSync(imagePath, imageBuffer)
+            } catch (error) {
+                return next(error)
+            }
+            imageArray.push(`${BASE_URL}/${imagePath}`)
+        });
+    } else {
+        imageArray = [...images]
+    }
+
+    try {
+        await Product.updateOne({_id:id},{ title,
+            brand,
+            category,
+            discountPercentage,
+            price,
+            stock,
+            description,
+            thumbnail: thumbnailPath,
+            images:imageArray })
+    } catch (error) { 
+        return next(error)
+    }
+
     res.status(200).json({ msg: "Product Updated" })
 
 }

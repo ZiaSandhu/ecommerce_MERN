@@ -2,10 +2,10 @@ import React, { useState, Fragment, useEffect} from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 
 import { Dialog, Disclosure, Menu, Transition } from '@headlessui/react'
-import { StarIcon, XMarkIcon } from '@heroicons/react/24/outline'
+import { XMarkIcon } from '@heroicons/react/24/outline'
 import { ChevronDownIcon, FunnelIcon, MinusIcon, PlusIcon, Squares2X2Icon } from '@heroicons/react/20/solid'
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/20/solid'
-import {NavLink} from 'react-router-dom'
+import { useNavigate} from 'react-router-dom'
 
 import {setProducts, filterBrands,  setAllCategoryBrands} from '../../store/productSlice'
 import { getProducts,getAllProduct } from "../../api/internal/productApi";
@@ -25,6 +25,7 @@ function classNames(...classes) {
 }
 export default function Products() {
   const dispatch = useDispatch();
+
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const [filter, setFilter] = useState({});
   const [sort, setSort] = useState({});
@@ -97,7 +98,7 @@ export default function Products() {
       };
       getFeatures();
     },
-    []
+    [dispatch]
   )
   const products = useSelector((state) => state.product.products);
   const totalProducts = useSelector((state) => state.product.totalProducts);
@@ -160,6 +161,7 @@ export default function Products() {
   );
 }
 function ProductGrid({products}) {
+  const navigate = useNavigate()
   return (
     <div className="lg:col-span-3">
       {" "}
@@ -181,10 +183,14 @@ function ProductGrid({products}) {
                 <div className="mt-4 flex justify-between">
                   <div>
                     <h3 className="text-sm text-gray-700">
-                      <NavLink to={`/product/${product._id}`} >
+                      <button 
+                      onClick={()=>{
+                        navigate(`/product/${product._id}`,{state:{product}})
+                      }}
+                      >
                         <span aria-hidden="true" className="absolute inset-0" />
                         {product.title}
-                      </NavLink>
+                      </button>
                     </h3>
                     <p className="mt-1 text-sm text-gray-500">
                       {product.rating}
@@ -315,7 +321,6 @@ function MobileFilter({filters,handleFilter, mobileFiltersOpen, setMobileFilters
 function DesktopFilter({filters,filter,handleFilter}) {
   return (
     <form className="hidden lg:block">
-      <h3 className='text-base font-semibold border-b border-gray-400 mt-3'>Filter By</h3>
       {filters.map((section) => (
         <Disclosure
           as="div"
