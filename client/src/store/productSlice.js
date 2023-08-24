@@ -66,6 +66,6 @@ const productSlice = createSlice({
     }
 })
 
-export const { setProducts: setProducts,  filterBrands, setProductDetail, setAllCategoryBrands } = productSlice.actions
+export const {  setProducts,  filterBrands, setProductDetail, setAllCategoryBrands } = productSlice.actions
 
 export default productSlice.reducer

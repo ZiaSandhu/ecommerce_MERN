@@ -1,7 +1,7 @@
 
 import { Dialog, Disclosure, Menu, Transition } from '@headlessui/react'
 import { StarIcon, XMarkIcon } from '@heroicons/react/24/outline'
-import { ChevronDownIcon, FunnelIcon, MinusIcon, PlusIcon, Squares2X2Icon } from '@heroicons/react/20/solid'
+import { ChevronDownIcon, FunnelIcon, MinusIcon, PlusIcon } from '@heroicons/react/20/solid'
 import { ChevronLeftIcon, ChevronRightIcon, PencilSquareIcon } from '@heroicons/react/20/solid'
 import { useNavigate} from 'react-router-dom'
 

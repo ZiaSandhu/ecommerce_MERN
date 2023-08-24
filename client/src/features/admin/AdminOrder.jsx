@@ -1,38 +1,40 @@
-import {  useEffect } from 'react'
+import {  useEffect, useState } from 'react'
 import {useSelector, useDispatch} from 'react-redux'
-import { getUserOrder, getAllOrder, getOrderDetail } from '../../api/internal/orderApi'
+import { getAllOrder } from '../../api/internal/orderApi'
 import { setOrders,setOrderDetail } from '../../store/orderSlice'
 import { useNavigate} from 'react-router-dom'
+import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/20/solid'
 
 export default function AdminOrderList() {
   const dispatch = useDispatch()
   const navigate = useNavigate()
-  const filters=[
+  const filterOptions=[
     'All',
+    "Placed",
     'Processed',
     'Shipped',
     'Delivered'
   ]
   const auth = useSelector(state => state.user.auth)
   const orders = useSelector(state => state.order.orders)
-
+  const [filter,setFilter] = useState('All')
+  const [page, setPage] = useState(1)
   const handleOrderClick = (orderId) => {
-    // set order detail
     dispatch(setOrderDetail(orderId));
-    //navigate to summary
     navigate(`/user/orderSummary`);
   }
-  const handleFilter = () => {
-    console.log('handle filter later')
+  const handlePagination = () => {
+
   }
+  let totalCount
   useEffect(()=>{
     async function gettingOrder(){
       let res;
       if (auth === true) {
-          res = await getAllOrder();
-        console.log(res)
+          res = await getAllOrder(filter,page);
         if (res.status === 200) {
           dispatch(setOrders(res.data.orders));
+          totalCount = res.data.totalCount
         }
         else{
           return 
@@ -40,7 +42,7 @@ export default function AdminOrderList() {
       }
     }
     gettingOrder()
-  },[])
+  },[dispatch,filter,page])
 
   return (
     <div className="bg-gray-100">
@@ -52,35 +54,46 @@ export default function AdminOrderList() {
 
           <section aria-labelledby="products-heading" className="pb-10 pt-3">
             <div className="grid grid-cols-1 gap-x-8 gap-y-5 lg:grid-cols-5">
-
               <div className="p-5 h-30 bg-white shadow-xl max-h-auto">
                 <h1 className="text-base font-bold tracking-tight text-gray-900">
                   Filter Orders
                 </h1>
                 <div className="grid grid-cols-2 lg:grid-cols-1 mt-5">
-                  {filters.map((menu, index) => (
-                  <div key={index} className="flex items-center gap-x-3">
-                  <input
-                    id={menu}
-                    name="filter"
-                    type="radio"
-                    onChange={e=> handleFilter(e)}
-                    className="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-600"
-                  />
-                  <label htmlFor={menu} className="block text-sm font-medium leading-6 text-gray-900">
-                    {menu}
-                  </label>
-                </div>
+                  {filterOptions.map((menu, index) => (
+                    <div key={index} className="flex items-center gap-x-3">
+                      <input
+                        id={menu}
+                        name="filter"
+                        type="radio"
+                        onChange={() => {
+                          setFilter(menu);
+                          setPage(1);
+                        }}
+                        className="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-600"
+                      />
+                      <label
+                        htmlFor={menu}
+                        className="block text-sm font-medium leading-6 text-gray-900"
+                      >
+                        {menu}
+                      </label>
+                    </div>
                   ))}
                 </div>
               </div>
 
               {/* Orders List */}
               <div className="lg:col-span-4">
-                <Orders orders={orders}  handleOrderClick={handleOrderClick}/>
+                <Orders orders={orders} handleOrderClick={handleOrderClick} />
               </div>
             </div>
           </section>
+
+          <Pagination
+            handlePagination={handlePagination}
+            _page={page}
+            totalCount={totalCount}
+          />
         </main>
       </div>
     </div>
@@ -128,4 +141,78 @@ return (
     )}
   </ul>
 );
+}
+
+function Pagination({handlePagination, _page, totalCount}) {
+  return (
+    <div className="flex items-center justify-between border-t border-gray-200 bg-white px-4 py-3 sm:px-6">
+      <div className="flex flex-1 justify-between sm:hidden">
+        <div
+          onClick={(e) => handlePagination(_page - 1)}
+          className="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+        >
+          Previous
+        </div>
+        <div
+          onClick={(e) => handlePagination(_page + 1)}
+          className="relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+        >
+          Next
+        </div>
+      </div>
+      <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
+        <div>
+          <p className="text-sm text-gray-700">
+            Showing{" "}
+            <span className="font-medium">
+              {(_page - 1) * 10 + 1}
+            </span>{" "}
+            to{" "}
+            <span className="font-medium">
+              {_page * 10 > totalCount
+                ? totalCount
+                : _page * 10}
+            </span>{" "}
+            of <span className="font-medium"> {totalCount} </span> results
+          </p>
+        </div>
+        <div>
+          <nav
+            className="isolate inline-flex -space-x-px rounded-md shadow-sm"
+            aria-label="Pagination"
+          >
+            <div
+              onClick={(e) => handlePagination(_page - 1)}
+              className="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0"
+            >
+              <span className="sr-only">Previous</span>
+              <ChevronLeftIcon className="h-5 w-5" aria-hidden="true" />
+            </div>
+            {Array.from({
+              length: Math.ceil(totalCount / 10),
+            }).map((item, index) => (
+              <div
+                key={index}
+                onClick={(e) => handlePagination(index + 1)}
+                className={`relative hidden items-center px-4 py-2 text-sm font-semibold ${
+                  index + 1 === _page
+                    ? "bg-indigo-600 text-white"
+                    : "text-gray-900"
+                } ring-1 ring-inset ring-gray-300 hover:bg-gray-300 hover:text-black  md:inline-flex cursor-pointer`}
+              >
+                {index + 1}
+              </div>
+            ))}
+            <div
+              onClick={(e) => handlePagination(_page + 1)}
+              className="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0"
+            >
+              <span className="sr-only">Next</span>
+              <ChevronRightIcon className="h-5 w-5" aria-hidden="true" />
+            </div>
+          </nav>
+        </div>
+      </div>
+    </div>
+  );
 }

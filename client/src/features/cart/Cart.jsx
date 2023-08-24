@@ -2,7 +2,7 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { PlusIcon, MinusIcon } from '@heroicons/react/20/solid'
 import { useEffect } from 'react';
-import { addCart } from '../../api/internal/cartApi';
+// import { addCart } from '../../api/internal/cartApi';
 import { removeItem, decreaseQty, increaseQty, updateTotal, localStorageCart } from '../../store/cartSlice';
 
 export default function Cart() {
@@ -39,16 +39,16 @@ export default function Cart() {
   }
   useEffect(()=>{
     async function updateCart(){
-      let data={
-        user: id,
-        products
-      }
+      // let data={
+      //   user: id,
+      //   products
+      // }
       // await addCart(data)
     }
     updateCart();
     dispatch(updateTotal())
     dispatch(localStorageCart())
-  },[products])
+  },[products, dispatch])
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
       <div className="border-t border-gray-200 px-4 py-6 sm:px-6">
@@ -56,7 +56,7 @@ export default function Cart() {
           Cart
         </h1>
         {products.length > 0 ?(<div className="flow-root">
-          <ul role="list" className="-my-6 divide-y divide-gray-200">
+          <ul  className="-my-6 divide-y divide-gray-200">
             {products.map((product) => (
               <li key={product.itemId} className="flex py-6">
                 <div className="h-24 w-24 flex-shrink-0 overflow-hidden rounded-md border border-gray-200">

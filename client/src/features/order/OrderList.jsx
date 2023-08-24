@@ -1,9 +1,7 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import {
   getUserOrder,
-  getAllOrder,
-  getOrderDetail,
 } from "../../api/internal/orderApi";
 import { setOrders, setOrderDetail } from "../../store/orderSlice";
 import { useNavigate } from "react-router-dom";
@@ -11,27 +9,20 @@ import { useNavigate } from "react-router-dom";
 export default function OrderList() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const filters = ["All", "Processed", "Shipped", "Delivered"];
+  const filterOptions = ["All", 'Placed' ,"Processed", "Shipped", "Delivered"];
   const auth = useSelector((state) => state.user.auth);
   const id = useSelector((state) => state.user.user.id);
-  const role = useSelector((state) => state.user.user.role);
   const orders = useSelector((state) => state.order.orders);
-
+  const [filter,setFilter] = useState('All')
   const handleOrderClick = (orderId) => {
-    // set order detail
     dispatch(setOrderDetail(orderId));
-    //navigate to summary
     navigate(`/user/orderSummary`);
-  };
-  const handleFilter = () => {
-    console.log("handle filter later");
   };
   useEffect(() => {
     async function gettingOrder() {
       let res;
       if (auth === true) {
-        res = await getUserOrder(id);
-        console.log(res);
+        res = await getUserOrder(id,filter);
         if (res.status === 200) {
           dispatch(setOrders(res.data.orders));
         } else {
@@ -40,7 +31,7 @@ export default function OrderList() {
       }
     }
     gettingOrder();
-  }, []);
+  }, [filter,dispatch, auth, id]);
 
   return (
     <div className="bg-gray-100">
@@ -57,13 +48,14 @@ export default function OrderList() {
                   Filter Orders
                 </h1>
                 <div className="grid grid-cols-2 lg:grid-cols-1 mt-5">
-                  {filters.map((menu, index) => (
+                  {filterOptions.map((menu, index) => (
                     <div key={index} className="flex items-center gap-x-3">
                       <input
                         id={menu}
                         name="filter"
                         type="radio"
-                        onChange={(e) => handleFilter(e)}
+                        value={menu}
+                        onChange={()=>setFilter(menu)}
                         className="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-600"
                       />
                       <label
@@ -92,10 +84,9 @@ export default function OrderList() {
 const Orders = ({ orders, handleOrderClick }) => {
   return (
     <ul
-      role="list"
       className="divide-y divide-gray-900  shadow-2xl p-3 bg-white"
     >
-      {orders ? (
+      {orders?.length>0 ? (
         orders.map((order, index) => (
           <li key={index} className="p-5 ">
             <div className="flex justify-between">

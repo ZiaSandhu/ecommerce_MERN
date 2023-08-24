@@ -17,7 +17,7 @@ export default function CheckOut() {
     register,
     reset,
     handleSubmit,
-    formState: { errors },
+    // formState: { errors },
   } = useForm();
   const dispatch = useDispatch();
   const navigate = useNavigate()
@@ -315,7 +315,7 @@ export default function CheckOut() {
                   <p className="mt-1 text-sm leading-6 text-gray-600">
                     Choose one from existing
                   </p>
-                  <ul role="list" className="divide-y divide-gray-100">
+                  <ul  className="divide-y divide-gray-100">
                     {user.shippingAddresses.map((add, index) => (
                       <li
                         key={index}
@@ -409,7 +409,7 @@ export default function CheckOut() {
                 Cart
               </h1>
               <div className="flow-root">
-                <ul role="list" className="-my-6 divide-y divide-gray-200">
+                <ul  className="-my-6 divide-y divide-gray-200">
                   {products.map((product, index) => (
                     <li key={index} className="flex py-6">
                       <div className="h-24 w-24 flex-shrink-0 overflow-hidden rounded-md border border-gray-200">

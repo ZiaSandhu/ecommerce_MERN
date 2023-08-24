@@ -5,7 +5,7 @@ import {
 } from "@heroicons/react/20/solid";
 import { useSelector, useDispatch } from "react-redux";
 import { Fragment, useRef, useState } from "react";
-import { Dialog, Transition, RadioGroup } from "@headlessui/react";
+import { Dialog, Transition } from "@headlessui/react";
 import {
   ExclamationTriangleIcon,
   XMarkIcon,
@@ -65,7 +65,7 @@ const UserProfile = () => {
             </div>
 
             {shippingAddresses.length > 0 ? (
-              <ul role="list" className="divide-y divide-gray-100">
+              <ul className="divide-y divide-gray-100">
                 {shippingAddresses.map((add, index) => (
                   <li key={index} className="px-4 py-6">
                     <div className="grid grid-cols-1 lg:grid-cols-3">
@@ -244,7 +244,7 @@ const UpdateForm = ({ openForm, setOpenForm,userId, address }) => {
     register,
     reset,
     handleSubmit,
-    formState: { errors },
+    // formState: { errors },
   } = useForm(
     { defaultValues:{
       name: address?.name,

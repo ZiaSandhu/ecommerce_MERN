@@ -14,23 +14,38 @@ const idSchema = (id) => {
     return true
 }
 const getOrder = async(req,res,next) => {
-    let orders;
+    let orders,count;
+    const {status, _page} = req.query
+    let query = Order.find({})
+    let total = Order.find({})
+    if(status){
+        query.where('status').equals(status)
+        total.where('status').equals(status)
+    }
+    if(_page){
+        query.skip((_page-1)*10).limit(10)
+    }
     try {
-        orders = await Order.find({})
+        [orders,count] = await Promise.all(query.exec(),total.count())
     } catch (error) {
         return next(error)
     }
     
-    res.status(200).json({msg:"Get all Orders",orders})
+    res.status(200).json({msg:"Get all Orders",orders,totalCount:count})
 
 }
 const getUserOrder = async(req,res,next) => {
     let orders;
     const result = idSchema(req.params)
     const {id} = req.params
+    const status = req.query.status
     if(result === true){
+        let query = Order.find({userId:id})
+        if(status){
+            query.where('status').equals(status)
+        }
         try {
-            orders = await Order.find({userId:id})
+            orders = await query.exec()
         } catch (error) {
             return next(error)
         }

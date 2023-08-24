@@ -2,7 +2,6 @@ import { Fragment, useEffect } from "react";
 import { Disclosure, Menu, Transition } from "@headlessui/react";
 import {
   Bars3Icon,
-  BellIcon,
   ShoppingCartIcon,
   XMarkIcon,
   UserCircleIcon
@@ -10,9 +9,7 @@ import {
 import { NavLink } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 
-import { logoutUser } from "../../store/userSlice";
-import { loginUserApi } from "../../api/internal/userApi";
-
+import logo from '../../logo.png'
 import {  updateTotal } from '../../store/cartSlice';
 
 
@@ -46,7 +43,7 @@ export default function Navbar() {
   const navigation = auth && user?.role==='admin' ? adminNavigation : clientnavigation
   useEffect(()=>{
     dispatch(updateTotal())
-  },[])
+  },[dispatch])
   return (
     <div className="min-h-full">
       <Disclosure as="nav" className="bg-gray-800">
@@ -57,8 +54,8 @@ export default function Navbar() {
                 <div className="flex items-center">
                   <div className="flex-shrink-0">
                     <img
-                      className="h-8 w-8"
-                      src="https://tailwindui.com/img/logos/mark.svg?color=indigo&shade=500"
+                      className="h-16 w-24"
+                      src={logo}
                       alt="Your Company"
                     />
                   </div>

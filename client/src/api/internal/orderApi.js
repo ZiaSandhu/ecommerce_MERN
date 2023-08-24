@@ -9,19 +9,30 @@ export const saveOrder = async(data) => {
     }
     return response
 }
-export const getAllOrder = async() => {
+export const getAllOrder = async(filter,page) => {
+    let query = '/orders'
+    if(page){
+        query = query + `?_page=${page}&_limit=10&`
+    }
+    if(filter!== 'All'){
+        query  = query + `status=${filter}`
+    }
     let response;
     try {
-        response = await api.get('/orders')
+        response = await api.get(query)
     } catch (error) {
         return error
     }
     return response
 }
-export const getUserOrder = async(data) => {
+export const getUserOrder = async(id,filter) => {
+    let query = `/order/user/${id}`
+    if(filter !== 'All'){
+        query = query + `?status=${filter}`
+    }
     let response;
     try {
-        response = await api.get(`/order/user/${data}`)
+        response = await api.get(query)
     } catch (error) {
         return error
     }

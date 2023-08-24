@@ -1,4 +1,4 @@
-import React , {useEffect} from 'react'
+import React  from 'react'
 import { useSelector } from 'react-redux'
 import { Navigate, useLocation } from 'react-router-dom'
 
@@ -11,7 +11,7 @@ const Protected = ({children}) => {
         }
         else{
             // todo this login is not valid if component render twice
-            localStorage.setItem('originalRoute', location.pathname);
+            // localStorage.setItem('originalRoute', location.pathname);
             return <Navigate to='/login' />
         }
 

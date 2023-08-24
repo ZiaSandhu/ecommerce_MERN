@@ -1,8 +1,7 @@
-import React, { useEffect } from "react";
-import { useSelector, useDispatch } from "react-redux";
+import React from "react";
+import { useSelector } from "react-redux";
 
 const OrderSummary = () => {
-  const dispatch = useDispatch()
   const orderDetail = useSelector((state) => state.order.orderDetail);
   const {
     products,
@@ -30,7 +29,7 @@ const OrderSummary = () => {
           <div className="mx-auto max-w-7xl px-2 sm:px-2 lg:px-4">
             <div className=" border-gray-200 px-2 py-1 sm:px-4">
               <div className="flow-root">
-                <ul role="list" className="-my-6 divide-y divide-gray-200">
+                <ul className="-my-6 divide-y divide-gray-200">
                   {products &&
                     products.map((product, index) => (
                       <li key={index} className="flex py-6">
