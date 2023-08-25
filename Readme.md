@@ -1,6 +1,9 @@
 # Ecommerce Store with MERN Stack
 
 Welcome to the Ecommerce Store project! This is a full-stack ecommerce application built using the MERN (MongoDB, Express, React, Node.js) stack, designed to help you master your development skills. The project utilizes Tailwind CSS for styling and offers a seamless shopping experience for users.
+## Demo
+
+Check out the live demo of the project: [Demo URL](https://pridestore.vercel.app/)
 
 ## Getting Started
 
