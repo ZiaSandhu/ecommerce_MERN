@@ -7,7 +7,9 @@ const { udpateCart, getCarts, getUserCart } = require('../controllers/cartContro
 const { getAllUsers,updateUser } = require('../controllers/userController')
 const { auth } = require('../middleware/auth')
 
-
+router.get('/',(req,res)=>{
+    res.json({msg:'Local host 5000'})
+})
 
 // authentication
 router.post('/register',register)
