@@ -13,7 +13,7 @@ const corsOptions = {
     credentials: true,
     origin: 'https://pridestore.vercel.app',
     methods: ['GET', 'POST', 'PUT', 'DELETE','PATCH'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'Access-Control-Allow-Origin'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
   };
 
 function start(){
