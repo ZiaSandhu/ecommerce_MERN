@@ -15,9 +15,12 @@ const corsOptions = {
     methods: ['GET', 'POST', 'PUT', 'DELETE','PATCH'],
     allowedHeaders: ['Content-Type', 'Authorization'],
   };
-
+  app.get('/',(req,res)=>{
+    res.json('Local host 5000')
+})
 function start(){
     try {
+        
         app.use(express.json({limit: '50mb'}))
         app.use(cors(corsOptions))
         app.use(cookieParser())
