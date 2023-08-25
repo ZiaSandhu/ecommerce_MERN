@@ -11,7 +11,7 @@ const app = express()
 
 const corsOption = {
     credentials: true,
-    origin: ['http://localhost:5173']
+    origin: ['https://pridestore.vercel.app']
 }
 
 function start(){
