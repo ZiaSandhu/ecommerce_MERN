@@ -16,7 +16,7 @@ const corsOptions = {
     allowedHeaders: ['Content-Type', 'Authorization'],
   };
   app.get('/',(req,res)=>{
-    res.json('Local host 5000')
+    res.json({msg:'Local host 5000'})
 })
 function start(){
     try {
