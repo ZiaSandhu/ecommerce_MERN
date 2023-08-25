@@ -9,10 +9,12 @@ const cookieParser = require('cookie-parser')
 const cors = require('cors')
 const app = express()
 
-const corsOption = {
+const corsOptions = {
     credentials: true,
-    origin: ['https://pridestore.vercel.app']
-}
+    origin: 'https://pridestore.vercel.app',
+    methods: ['GET', 'POST', 'PUT', 'DELETE','PATHC'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+  };
 
 function start(){
     try {
