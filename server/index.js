@@ -13,7 +13,7 @@ const corsOptions = {
     credentials: true,
     origin: 'https://pridestore.vercel.app',
     methods: ['GET', 'POST', 'PUT', 'DELETE','PATCH'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Access-Control-Allow-Origin'],
   };
 
 function start(){
@@ -21,10 +21,10 @@ function start(){
         app.use(express.json({limit: '50mb'}))
         app.use(cookieParser())
         app.use(cors(corsOptions))
-        app.use((req, res, next) => {
-            res.setHeader('Access-Control-Allow-Origin', 'https://pridestore.vercel.app'); // Replace with your frontend URL
-            next();
-          });
+        // app.use((req, res, next) => {
+        //     res.setHeader('Access-Control-Allow-Origin', 'https://pridestore.vercel.app'); // Replace with your frontend URL
+        //     next();
+        //   });
           
         app.use(router)
         dbConnect(URI)
