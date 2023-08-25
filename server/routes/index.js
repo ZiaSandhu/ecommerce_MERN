@@ -8,8 +8,8 @@ const { getAllUsers,updateUser } = require('../controllers/userController')
 const { auth } = require('../middleware/auth')
 
 
-router.get('/',()=>{
-    resizeBy.json('Loca host 5000')
+router.get('/',(req,res)=>{
+    res.json('Loca host 5000')
 })
 // authentication
 router.post('/register',register)
