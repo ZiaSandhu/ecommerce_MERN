@@ -9,7 +9,7 @@ import { useNavigate} from 'react-router-dom'
 
 import {setProducts, filterBrands,  setAllCategoryBrands} from '../../store/productSlice'
 import { getProducts,getAllProduct } from "../../api/internal/productApi";
-
+import {Loader} from '../Loader'
 const sortOptions = [
   { name: 'Best Rating', sort: 'rating', order: '-1' },
   { name: 'Price: Low to High', sort: 'price', order: '1' },
@@ -116,6 +116,11 @@ export default function Products() {
       options: brands
     },
   ];
+
+  if(!products){
+    return <Loader />
+  }
+
   return (
     <div>
       <div className="bg-white">

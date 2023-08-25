@@ -26,7 +26,7 @@ const getOrder = async(req,res,next) => {
         query.skip((_page-1)*10).limit(10)
     }
     try {
-        [orders,count] = await Promise.all(query.exec(),total.count())
+        [orders,count] = await Promise.all([query.exec(),total.count()])
     } catch (error) {
         return next(error)
     }

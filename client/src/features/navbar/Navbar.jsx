@@ -9,7 +9,7 @@ import {
 import { NavLink } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 
-import logo from '../../logo.png'
+import logo from '../../assets/logo.png'
 import {  updateTotal } from '../../store/cartSlice';
 
 

@@ -4,7 +4,7 @@ import { getAllOrder } from '../../api/internal/orderApi'
 import { setOrders,setOrderDetail } from '../../store/orderSlice'
 import { useNavigate} from 'react-router-dom'
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/20/solid'
-
+import {Loader} from '../Loader'
 export default function AdminOrderList() {
   const dispatch = useDispatch()
   const navigate = useNavigate()
@@ -23,10 +23,10 @@ export default function AdminOrderList() {
     dispatch(setOrderDetail(orderId));
     navigate(`/user/orderSummary`);
   }
-  const handlePagination = () => {
-
+  const handlePagination = (index) => {
+    setPage(index)
   }
-  let totalCount
+const [totalCount, setTotalCount] = useState(0)
   useEffect(()=>{
     async function gettingOrder(){
       let res;
@@ -34,7 +34,7 @@ export default function AdminOrderList() {
           res = await getAllOrder(filter,page);
         if (res.status === 200) {
           dispatch(setOrders(res.data.orders));
-          totalCount = res.data.totalCount
+          setTotalCount(res.data.totalCount)
         }
         else{
           return 
@@ -43,6 +43,7 @@ export default function AdminOrderList() {
     }
     gettingOrder()
   },[dispatch,filter,page])
+
 
   return (
     <div className="bg-gray-100">
@@ -84,11 +85,14 @@ export default function AdminOrderList() {
 
               {/* Orders List */}
               <div className="lg:col-span-4">
-                <Orders orders={orders} handleOrderClick={handleOrderClick} />
+                {orders ? (
+                  <Orders orders={orders} handleOrderClick={handleOrderClick} />
+                ) : (
+                  <Loader />
+                )}
               </div>
             </div>
           </section>
-
           <Pagination
             handlePagination={handlePagination}
             _page={page}
@@ -103,7 +107,7 @@ export default function AdminOrderList() {
 const Orders = ({orders,handleOrderClick}) => {
 return (
   <ul role="list" className="divide-y divide-gray-900  shadow-2xl p-3 bg-white">
-    {orders ? (
+    {orders?.length > 0  ? (
       orders.map((order, index) => (
         <li key={index} className="p-5 ">
           <div className="flex justify-between">

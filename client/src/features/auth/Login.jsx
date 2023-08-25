@@ -5,7 +5,8 @@ import { useForm } from "react-hook-form"
 import {loginUserApi} from '../../api/internal/userApi'
 import {loginUser} from '../../store/userSlice'
 import { useState } from 'react'
-import logo from '../../logo.png'
+import logo from '../../assets/logo.png'
+
 export default function Login() {
   const navigate = useNavigate()
   const dispatch = useDispatch()
