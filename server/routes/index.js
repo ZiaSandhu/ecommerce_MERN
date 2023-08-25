@@ -10,7 +10,6 @@ const { auth } = require('../middleware/auth')
 
 router.get('/',()=>{
     resizeBy.json('Loca host 5000')
-    console.log('Local host 5000')
 })
 // authentication
 router.post('/register',register)

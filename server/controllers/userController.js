@@ -62,7 +62,6 @@ const updateUser = async (req, res, next) => {
             return next(error)
         }
         if(shippingAddress ){
-            console.log('shipping address')
             if (action === 'push') {
                 user.shippingAddresses.push(shippingAddress)
             }

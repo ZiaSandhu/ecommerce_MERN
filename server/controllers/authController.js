@@ -25,7 +25,6 @@ const asignTokens = (id, res) => {
     })
 }
 const register = async (req, res, next) => {
-    console.log('register route');
     const registerSchema = Joi.object({
         username: Joi.string().min(5).max(30).required(),
         email: Joi.string().email().required(),
@@ -35,7 +34,6 @@ const register = async (req, res, next) => {
     const { error } = registerSchema.validate(req.body)
 
     if (error) {
-        console.log("🚀 ~ file: authController.js:53 ~ register ~ error:", error)
         return next(error)
     }
     const { username, email, password, role } = req.body
@@ -46,14 +44,12 @@ const register = async (req, res, next) => {
     if (userExist) {
         errorGlobal.status = 409
         errorGlobal.message = "UserName already exists! Try different."
-        console.log("🚀 ~ file: authController.js:65 ~ register ~ errorGlobal:", errorGlobal)
         return next(errorGlobal)
     }
     let emailExist = await User.exists({ email })
     if (emailExist) {
         errorGlobal.status = 409
         errorGlobal.message = "Email already exists! Try different."
-        console.log("🚀 ~ file: authController.js:72 ~ register ~ errorGlobal:", errorGlobal)
         return next(errorGlobal)
     }
     let hashedPassword = await bcrypt.hash(password, 10)
@@ -63,11 +59,9 @@ const register = async (req, res, next) => {
     try {
         user = await newUser.save()
     } catch (error) {
-        console.log("🚀 ~ file: authController.js:81 ~ register ~ error:", error)
         return next(error)
     }
     asignTokens(user._id, res)
-    console.log('final response')
     return res.status(201).json({ msg: 'User Created', user: new UserDto(user), auth: true })
 }
 const login = async (req, res, next) => {

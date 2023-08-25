@@ -34,7 +34,6 @@ const udpateCart = async(req,res,next) => {
         }
         else{
             cart.products = products
-            console.log("🚀 ~ file: cartController.js:39 ~ udpateCart ~ cart:", cart)
             cart.save()
             status = 200
         }

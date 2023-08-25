@@ -6,10 +6,8 @@ async function dbConnect(uri) {
             useNewUrlParser: true,
             useUnifiedTopology: true,
         });
-        console.info(`Database Connect to host: ${conn.connection.host}`)
 
     } catch (error) {
-        console.error(error)
     }
     
 }
