@@ -19,13 +19,8 @@ const corsOptions = {
 function start(){
     try {
         app.use(express.json({limit: '50mb'}))
-        app.use(cookieParser())
         app.use(cors(corsOptions))
-        // app.use((req, res, next) => {
-        //     res.setHeader('Access-Control-Allow-Origin', 'https://pridestore.vercel.app'); // Replace with your frontend URL
-        //     next();
-        //   });
-          
+        app.use(cookieParser())
         app.use(router)
         dbConnect(URI)
         app.use('/assets',express.static('assets'))
