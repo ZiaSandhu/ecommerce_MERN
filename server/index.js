@@ -12,7 +12,7 @@ const app = express()
 const corsOptions = {
     credentials: true,
     origin: 'https://pridestore.vercel.app',
-    methods: ['GET', 'POST', 'PUT', 'DELETE','PATHC'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE','PATCH'],
     allowedHeaders: ['Content-Type', 'Authorization'],
   };
 
@@ -20,7 +20,7 @@ function start(){
     try {
         app.use(express.json({limit: '50mb'}))
         app.use(cookieParser())
-        app.use(cors(corsOption))
+        app.use(cors(corsOptions))
         app.use(router)
         dbConnect(URI)
         app.use('/assets',express.static('assets'))
