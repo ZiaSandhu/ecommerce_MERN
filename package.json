@@ -7,7 +7,8 @@
     "start-server": "cd server && npm run dev",
     "init": "concurrently \"npm run initclient\" \"npm run initserver\" ",
     "initserver": "cd server && npm install",
-    "initclient": "cd server && npm install"
+    "initclient": "cd server && npm install",
+    "update":"git add . && git commit -m 'Update' && git push"
   },
   "keywords": [],
   "devDependencies": {
